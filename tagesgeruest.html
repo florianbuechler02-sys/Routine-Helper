@@ -230,6 +230,12 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .dial .read .u{font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-3); font-weight:600}
 .dial.paused .arc{stroke:var(--line-strong)}
 .dial.over .read .t{color:var(--alert)}
+.trow{display:flex; align-items:center; gap:12px; width:100%; max-width:400px}
+.trow .t{font-family:var(--f-mono); font-size:21px; font-weight:600; flex:none; font-variant-numeric:tabular-nums}
+.trow.over .t{color:var(--alert)}
+.tbar{flex:1; height:6px; background:var(--surface-2); border-radius:3px; overflow:hidden}
+.tbar i{display:block; height:100%; width:0; background:var(--accent); border-radius:3px; transition:width .2s linear}
+.trow.over .tbar i{background:var(--alert)}
 .acts{display:flex; flex-direction:column; gap:10px; width:100%; max-width:330px}
 .acts .row{display:flex; gap:10px}
 .acts .row > *{flex:1}
@@ -288,6 +294,29 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .saved{font-size:12.5px; color:var(--good)}
 .settings{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px}
 
+/* ---------- Notizen ---------- */
+.sheet{
+  position:fixed; inset:0; z-index:40; display:flex; align-items:flex-end; justify-content:center;
+  background:rgba(10,12,11,.5); padding:0;
+}
+.sheetbox{
+  width:100%; max-width:520px; background:var(--surface); border-top:1px solid var(--line);
+  border-radius:var(--r-l) var(--r-l) 0 0; padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:11px; box-shadow:0 -12px 40px -20px rgba(0,0,0,.6);
+}
+.sheetbox h3{font-size:20px}
+.sheetbox textarea{
+  font-family:var(--f-body); font-size:16px; padding:11px; min-height:110px; resize:vertical;
+  background:var(--ground); color:var(--ink); border:1px solid var(--line-strong); border-radius:var(--r-s);
+}
+.sheetbox .row{display:flex; gap:10px}
+.sheetbox .row > *{flex:1; justify-content:center}
+.notelist{display:flex; flex-direction:column; gap:0; margin-top:12px}
+.note{display:grid; grid-template-columns:1fr auto; gap:4px 12px; padding:11px 0; border-top:1px solid var(--line)}
+.note:first-child{border-top:none}
+.note p{margin:0; font-size:14.5px; line-height:1.45; grid-column:1}
+.note .meta{grid-column:1; font-family:var(--f-mono); font-size:11px; color:var(--ink-3)}
+.note .mini{grid-column:2; grid-row:1/span 2; align-self:start}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 @media (max-width:400px){
@@ -308,7 +337,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 4,
+  v: 5,
   promptCount: 3,
   bedtime: "22:45",
   sleepHours: 8,
@@ -354,12 +383,10 @@ const DEFAULT_CONFIG = {
     {id:"e2", name:"Essen für morgen vorbereiten",  type:"timer",   sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box."},
     {id:"e3", name:"Outfit rauslegen",              type:"check",   sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr."},
     {id:"e4", name:"Tasche packen",                 type:"check",   sec:180,  note:""},
-    {id:"e5", name:"Handy weglegen",                type:"check",   sec:60,   note:"Ladekabel außerhalb des Schlafzimmers.", deadline:"phone"},
-    {id:"e6", name:"Zähne putzen",                  type:"timer",   sec:120,  note:""},
-    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display.", optional:true},
-    {id:"e8", name:"Drei Fragen",                   type:"reflect", sec:120,  note:""},
+    {id:"e6", name:"Zähne putzen",                  type:"reflect", sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
+    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true},
     {id:"e9", name:"Wecker stellen",                type:"check",   sec:60,   note:"", deadline:"wake"},
-    {id:"e10",name:"Licht aus",                     type:"check",   sec:0,    note:""}
+    {id:"e10",name:"Handy weg & Licht aus",         type:"check",   sec:60,   note:"Ladekabel außerhalb des Schlafzimmers. Ab hier brauchst du es nicht mehr.", deadline:"phone"}
   ]
 };
 
@@ -438,6 +465,12 @@ const store = {
       logs.docs.forEach(d => { const v = d.data(); if (v) seen[d.id] = v; });
       state.logs = Object.assign({}, state.logs, seen);
       LS.write("logs", state.logs);
+      const notes = await db.collection("notes").orderBy("at","desc").limit(100).get();
+      const nrows = notes.docs.map(d => d.data()).filter(n => n && n.id);
+      const nmerged = {};
+      state.notes.concat(nrows).forEach(n => { nmerged[n.id] = n; });
+      state.notes = Object.values(nmerged).sort((a,b) => a.at < b.at ? -1 : 1).slice(-200);
+      LS.write("notes", state.notes);
       const planks = await db.collection("planks").orderBy("at","desc").limit(40).get();
       const rows = planks.docs.map(d => d.data()).filter(Boolean);
       if (rows.length) {
@@ -458,6 +491,16 @@ const store = {
     LS.write("logs", state.logs);
     if (this.db) this.db.doc("logs/"+id).set(JSON.parse(JSON.stringify(log))).catch(()=>{});
   },
+  saveNote(entry){
+    state.notes = state.notes.concat([entry]).slice(-200);
+    LS.write("notes", state.notes);
+    if (this.db) this.db.doc("notes/"+entry.id).set(JSON.parse(JSON.stringify(entry))).catch(()=>{});
+  },
+  dropNote(id){
+    state.notes = state.notes.filter(n => n.id !== id);
+    LS.write("notes", state.notes);
+    if (this.db) this.db.doc("notes/"+id).delete().catch(()=>{});
+  },
   savePlank(entry){
     state.planks = state.planks.concat([entry]).slice(-40);
     LS.write("planks", state.planks);
@@ -476,6 +519,7 @@ function normalizeConfig(raw){
       note: String(s.note || ""),
       optional: !!s.optional,
       mind: !!s.mind,
+      manual: !!s.manual,
       deadline: s.deadline || null
     }));
   });
@@ -499,6 +543,8 @@ const state = {
   })(),
   logs: LS.read("logs", {}),
   planks: LS.read("planks", []),
+  notes: LS.read("notes", []),
+  noteOpen: null,
   view: "home",
   planRoutine: "morning",
   editing: null,
@@ -642,6 +688,7 @@ function renderHome(){
 
     ${plankPanel()}
     ${weekPanel()}
+    ${notesPanel()}
 
     <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">
       <button class="btn ghost" data-go="editor">Routinen bearbeiten</button>
@@ -787,7 +834,8 @@ function startRun(routine, resume, fromIdx){
 
 function withPrompts(list){
   const steps = list.map(s => ({ id:s.id, name:s.name, type:s.type, sec:s.sec, note:s.note,
-                                 deadline:s.deadline || null, status:"open", actual:0, prompt:null }));
+                                 deadline:s.deadline || null, manual:!!s.manual,
+                                 status:"open", actual:0, prompt:null }));
   const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
   if (!want) return steps;
   // candidates are the marked holds; which of them get a question rotates daily
@@ -807,6 +855,8 @@ function withPrompts(list){
   return steps;
 }
 
+function isTimed(s){ return !!s && s.sec > 0 && (s.type === "timer" || s.type === "reflect"); }
+
 function currentStep(){ const r = state.run; return r && r.steps[r.idx] ? r.steps[r.idx] : null; }
 
 function enterStep(initial){
@@ -816,7 +866,8 @@ function enterStep(initial){
   r.paused = false; r.pausedLeft = 0;
   r.swRunning = false; r.swSec = 0; r.swStartedAt = 0;
   r.fired = false;
-  r.stepEndsAt = s.type === "timer" && s.sec > 0 ? Date.now() + s.sec*1000 : null;
+  r.armed = isTimed(s) && !s.manual;
+  r.stepEndsAt = r.armed ? Date.now() + s.sec*1000 : null;
   if (!initial) persistRun();
 }
 
@@ -902,7 +953,7 @@ function paintLive(){
   const etaEl = document.getElementById("eta");
   if (etaEl) {
     let leftSec = remainingTargetSec();
-    if (s.type === "timer" && r.stepEndsAt && !r.paused) {
+    if (isTimed(s) && r.stepEndsAt && !r.paused) {
       leftSec = leftSec - s.sec + Math.max(0, (r.stepEndsAt - Date.now())/1000);
     }
     const at = plusMinutes(new Date(), leftSec/60);
@@ -918,8 +969,8 @@ function paintLive(){
     }
   }
 
-  if (s.type === "timer" && r.stepEndsAt) {
-    const leftMs = r.paused ? r.pausedLeft : (r.stepEndsAt - Date.now());
+  if (isTimed(s)) {
+    const leftMs = !r.stepEndsAt ? s.sec*1000 : r.paused ? r.pausedLeft : (r.stepEndsAt - Date.now());
     const left = leftMs/1000;
     const tEl = document.getElementById("dialtime");
     if (tEl) tEl.textContent = mmss(Math.abs(left));
@@ -929,12 +980,19 @@ function paintLive(){
       const p = Math.min(1, Math.max(0, 1 - left/Math.max(1, s.sec)));
       arc.setAttribute("stroke-dashoffset", String(C*(1-p)));
     }
+    const bar = document.getElementById("tfill");
+    if (bar) bar.style.width = Math.min(100, Math.max(0, (1 - left/Math.max(1, s.sec))*100)) + "%";
     const dial = document.getElementById("dial");
     if (dial) dial.classList.toggle("over", left < 0);
-    if (left <= 0 && !r.paused && !r.fired) {
+    const trow = document.getElementById("trow");
+    if (trow) trow.classList.toggle("over", left < 0);
+    if (left <= 0 && r.stepEndsAt && !r.paused && !r.fired) {
       r.fired = true;
       chimeStep();
-      setTimeout(() => { if (state.run && currentStep() === s) { r.fired = false; advance("done"); } }, 400);
+      // Timer-Schritte springen weiter, Frage-Schritte warten auf die Antwort
+      if (s.type === "timer") {
+        setTimeout(() => { if (state.run && currentStep() === s) { r.fired = false; advance("done"); } }, 400);
+      }
     }
   }
   if (s.type === "stopwatch" && r.swRunning) {
@@ -981,14 +1039,17 @@ function renderRunner(){
       <span class="eyebrow">Als nächstes</span>
       ${q1 ? `<div class="qrow"><span class="qt mono">${q1.sec ? mmss(q1.sec) : "—"}</span>${esc(q1.name)}</div>` : `<div class="qrow"><span class="qt mono">—</span>letzter Schritt</div>`}
       ${q2 ? `<div class="qrow second"><span class="qt mono">${q2.sec ? mmss(q2.sec) : "—"}</span>${esc(q2.name)}</div>` : ""}
-      <button class="exit" id="quit">Routine abbrechen</button>
+      <div style="display:flex; gap:14px; align-items:center">
+        <button class="exit" data-act="noteopen">Notiz</button>
+        <button class="exit" id="quit">Routine abbrechen</button>
+      </div>
     </div>
   `;
   return el;
 }
 
 function deadlineNote(s){
-  if (s.deadline === "phone") return `Ab <b class="mono">${phoneAway()}</b> — 45 Minuten vor dem Zubettgehen.`;
+  if (s.deadline === "phone") return `Ziel war <b class="mono">${phoneAway()}</b>, 45 Minuten vor dem Zubettgehen.`;
   if (s.deadline === "wake") return `Wecker auf <b class="mono">${wakeTime()}</b> für ${state.config.sleepHours} h Schlaf.`;
   return "";
 }
@@ -1002,9 +1063,18 @@ function stageHTML(s, r){
 
   if (s.type === "reflect") {
     const a = r.answers;
+    const waiting = isTimed(s) && !r.stepEndsAt;
+    const trow = isTimed(s) ? `
+      <div class="trow" id="trow">
+        <span class="t mono" id="dialtime">${mmss(s.sec)}</span>
+        <div class="tbar"><i id="tfill"></i></div>
+        <button class="mini" data-act="${waiting ? "arm" : "pause"}">${waiting ? "Start" : r.paused ? "Weiter" : "Pause"}</button>
+      </div>` : "";
     return `
       <span class="stepno mono">${no}</span>
       <h2>${esc(s.name)}</h2>
+      ${note}
+      ${trow}
       <div class="reflect">
         <div class="q">
           <label>Energie heute</label>
@@ -1045,16 +1115,19 @@ function stageHTML(s, r){
   }
 
   if (s.type === "timer" && s.sec > 0) {
+    const waiting = !r.stepEndsAt;
     return `
       <span class="stepno mono">${no}</span>
       <h2>${esc(s.name)}</h2>
       ${note}${dlp}${mind}
-      ${dial(s.sec, r.paused)}
+      ${dial(s.sec, r.paused, waiting ? "bereit" : null)}
       <div class="acts">
-        <div class="row">
-          <button class="btn big" data-act="done">Fertig</button>
-          <button class="btn ghost big" data-act="pause">${r.paused ? "Weiter" : "Pause"}</button>
-        </div>
+        ${waiting
+          ? `<button class="btn big" data-act="arm">Timer starten</button>`
+          : `<div class="row">
+               <button class="btn big" data-act="done">Fertig</button>
+               <button class="btn ghost big" data-act="pause">${r.paused ? "Weiter" : "Pause"}</button>
+             </div>`}
         <div class="row">
           <button class="btn ghost" data-act="plus">+30 s</button>
           <button class="btn ghost" data-act="skip">Überspringen</button>
@@ -1073,7 +1146,7 @@ function stageHTML(s, r){
     </div>`;
 }
 
-function dial(sec, paused){
+function dial(sec, paused, label){
   return `<div class="dial${paused ? " paused" : ""}" id="dial">
     <svg viewBox="0 0 200 200" aria-hidden="true">
       <circle class="rail" cx="100" cy="100" r="86"></circle>
@@ -1081,7 +1154,7 @@ function dial(sec, paused){
     </svg>
     <div class="read">
       <span class="t mono" id="dialtime">${mmss(sec)}</span>
-      <span class="u">${paused ? "Pause" : "Sekunden"}</span>
+      <span class="u">${label || (paused ? "Pause" : "Sekunden")}</span>
     </div>
   </div>`;
 }
@@ -1121,8 +1194,56 @@ function summaryHTML(){
     ${r.routine === "evening" && r.answers.tomorrow ? `<p class="skiplist">Morgen zuerst: <b>${esc(r.answers.tomorrow)}</b></p>` : ""}
     <div class="acts" style="max-width:none">
       <button class="btn big" data-act="close">Zurück zur Übersicht</button>
+      <button class="btn ghost" data-act="noteopen">Notiz zu diesem Durchlauf</button>
     </div>
   </div></div>`;
+}
+
+function renderSheet(){
+  const ctx = state.noteOpen || {};
+  const wo = ctx.step ? `${ctx.routineLabel} · ${ctx.step}` : ctx.routineLabel || "Ohne Durchlauf";
+  const el = document.createElement("div");
+  el.className = "sheet";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.innerHTML = `
+    <div class="sheetbox">
+      <span class="eyebrow">Notiz</span>
+      <h3>Was soll anders sein?</h3>
+      <p class="hint">${esc(wo)} · wird gesammelt, bis du sie durchgehen willst</p>
+      <textarea id="notetext" placeholder="Dehnung zu kurz, Frühstück braucht länger, Reihenfolge tauschen …"></textarea>
+      <div class="row">
+        <button class="btn" data-act="notesave">Speichern</button>
+        <button class="btn ghost" data-act="noteclose">Abbrechen</button>
+      </div>
+    </div>`;
+  return el;
+}
+
+function notesPanel(){
+  if (!state.notes.length) {
+    return `<div class="panel">
+      <span class="eyebrow">Notizen</span>
+      <h3>Nichts offen</h3>
+      <p class="empty">Während einer Routine oder danach auf „Notiz“ tippen. Alles Gesammelte steht hier, bis du es abarbeiten lässt.</p>
+      <div style="margin-top:12px"><button class="btn ghost" data-act="noteopen">Notiz schreiben</button></div>
+    </div>`;
+  }
+  const rows = state.notes.slice().reverse().map(n => {
+    const d = new Date(n.at);
+    return `<div class="note">
+      <p>${esc(n.text)}</p>
+      <span class="meta">${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${clockOf(d)} · ${esc(n.where || "–")}</span>
+      <button class="mini del" data-dropnote="${esc(n.id)}" aria-label="Notiz löschen">✕</button>
+    </div>`;
+  }).join("");
+  return `<div class="panel">
+    <span class="eyebrow">Notizen</span>
+    <h3>${state.notes.length} gesammelt</h3>
+    <div class="notelist">${rows}</div>
+    <p class="empty">Sag mir Bescheid, dann lese ich sie aus und baue die Änderungen ein. Erledigtes löschst du mit dem Kreuz.</p>
+    <div style="margin-top:12px"><button class="btn ghost" data-act="noteopen">Notiz schreiben</button></div>
+  </div>`;
 }
 
 /* ============================================================
@@ -1238,6 +1359,7 @@ function editorList(routine, title, color){
         <input class="dur" type="text" inputmode="numeric" value="${mmss(s.sec)}" data-f="sec" aria-label="Dauer mm:ss">
         <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="optional" ${s.optional?"checked":""}>optional</label>
         <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="mind" ${s.mind?"checked":""}>Denkanstoß</label>
+        <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="manual" ${s.manual?"checked":""}>Start selbst</label>
       </div>
       <textarea data-f="note" placeholder="Hinweis, der beim Schritt steht">${esc(s.note)}</textarea>
     </div>`).join("");
@@ -1264,6 +1386,11 @@ function render(){
   else app.appendChild(renderHome());
   if (!state.run) window.scrollTo(0, state.view === "editor" ? scroll : scroll);
   if (state.run && state.run.phase === "run") { paintLive(); tickLoop(); }
+  if (state.noteOpen) {
+    app.appendChild(renderSheet());
+    const ta = document.getElementById("notetext");
+    if (ta) setTimeout(() => ta.focus(), 30);
+  }
   if (state.savedFlash) {
     const f = document.getElementById("savedflag");
     if (f) { f.hidden = false; setTimeout(()=>{ f.hidden = true; }, 1400); }
@@ -1314,6 +1441,35 @@ app.addEventListener("click", e => {
     }
   }
 
+  if (t.dataset.dropnote) { store.dropNote(t.dataset.dropnote); render(); return; }
+  if (t.dataset.act === "noteopen") {
+    const r0 = state.run, st = r0 ? r0.steps[r0.idx] : null;
+    state.noteOpen = {
+      routine: r0 ? r0.routine : null,
+      routineLabel: r0 ? (r0.routine === "morning" ? "Morgen" : "Abend") : "Startseite",
+      step: r0 && r0.phase === "run" && st ? st.name : (r0 ? "nach dem Durchlauf" : null)
+    };
+    render(); return;
+  }
+  if (t.dataset.act === "noteclose") { state.noteOpen = null; render(); return; }
+  if (t.dataset.act === "notesave") {
+    const ta = document.getElementById("notetext");
+    const text = ta ? ta.value.trim() : "";
+    if (text) {
+      const ctx = state.noteOpen || {};
+      store.saveNote({
+        id: "n" + Date.now().toString(36) + uid(),
+        at: new Date().toISOString(),
+        day: isoDay(),
+        routine: ctx.routine || null,
+        where: ctx.step ? `${ctx.routineLabel} · ${ctx.step}` : (ctx.routineLabel || "–"),
+        text: text
+      });
+      beep(700, .1);
+    }
+    state.noteOpen = null; render(); return;
+  }
+
   const act = t.dataset.act;
   if (!act || !state.run) return;
   const r = state.run, s = currentStep();
@@ -1326,14 +1482,20 @@ app.addEventListener("click", e => {
     advance("done"); return;
   }
   if (act === "skip") { advance("skipped"); return; }
+  if (act === "arm") {
+    if (s && isTimed(s)) { r.stepEndsAt = Date.now() + s.sec*1000; r.armed = true; r.paused = false; r.fired = false; beep(560,.09); }
+    render(); return;
+  }
   if (act === "pause") {
     if (r.paused) { r.stepEndsAt = Date.now() + r.pausedLeft; r.paused = false; }
     else { r.pausedLeft = Math.max(0, r.stepEndsAt - Date.now()); r.paused = true; }
     render(); return;
   }
   if (act === "plus") {
-    if (r.paused) r.pausedLeft += 30000; else r.stepEndsAt += 30000;
     if (s) s.sec += 30;
+    if (!r.stepEndsAt) { /* noch nicht gestartet: nur die Vorgabe wächst */ }
+    else if (r.paused) r.pausedLeft += 30000;
+    else r.stepEndsAt += 30000;
     render(); return;
   }
   if (act === "swstart") { r.swRunning = true; r.swStartedAt = Date.now(); r.swSec = 0; beep(520,.1); render(); return; }
@@ -1384,6 +1546,7 @@ app.addEventListener("change", e => {
     if (f === "type") s.type = el.value;
     if (f === "optional") s.optional = el.checked;
     if (f === "mind") s.mind = el.checked;
+    if (f === "manual") s.manual = el.checked;
     if (f === "sec") { s.sec = Math.min(7200, Math.max(0, parseDur(el.value))); el.value = mmss(s.sec); }
     store.saveConfig();
     const sum = box.closest(".steplist") && box.closest(".steplist").previousElementSibling;
@@ -1393,6 +1556,10 @@ app.addEventListener("change", e => {
 });
 
 document.addEventListener("keydown", e => {
+  if (state.noteOpen) {
+    if (e.key === "Escape") { state.noteOpen = null; render(); }
+    return;
+  }
   if (!state.run || state.run.phase !== "run") return;
   if (e.target.matches("textarea, input")) return;
   if (e.code === "Space" || e.key === "Enter") {
