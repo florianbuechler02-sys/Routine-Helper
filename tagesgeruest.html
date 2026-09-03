@@ -1,0 +1,1428 @@
+<title>Tagesgerüst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F1F2EF;
+  --surface:#FBFBF9;
+  --surface-2:#E7E9E3;
+  --ink:#16181A;
+  --ink-2:#585E62;
+  --ink-3:#8B9096;
+  --line:#DBDDD6;
+  --line-strong:#C4C7BF;
+  --dawn:#B3541E;
+  --dusk:#4B4FAE;
+  --good:#3B7A55;
+  --alert:#A8442F;
+  --accent:var(--dawn);
+  --on-accent:#FBFBF9;
+  --wash:transparent;
+  --shadow:0 1px 2px rgba(22,24,26,.05), 0 8px 24px -18px rgba(22,24,26,.35);
+  --r-s:6px; --r-m:10px; --r-l:16px;
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Helvetica Neue",system-ui,sans-serif;
+  --f-mono:"Martian Mono","SFMono-Regular",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#141614;
+    --surface:#1C1F1D;
+    --surface-2:#262A27;
+    --ink:#F0F1EC;
+    --ink-2:#AEB4AF;
+    --ink-3:#7C837E;
+    --line:#2E3230;
+    --line-strong:#41463F;
+    --dawn:#F09A4E;
+    --dusk:#9498F0;
+    --good:#69B085;
+    --alert:#E28068;
+    --on-accent:#16181A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#141614;
+  --surface:#1C1F1D;
+  --surface-2:#262A27;
+  --ink:#F0F1EC;
+  --ink-2:#AEB4AF;
+  --ink-3:#7C837E;
+  --line:#2E3230;
+  --line-strong:#41463F;
+  --dawn:#F09A4E;
+  --dusk:#9498F0;
+  --good:#69B085;
+  --alert:#E28068;
+  --on-accent:#16181A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
+}
+:root[data-phase="evening"]{ --accent:var(--dusk); }
+:root[data-phase="morning"]{ --accent:var(--dawn); }
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; line-height:1.5;
+  -webkit-text-size-adjust:100%;
+  min-height:100vh;
+}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:balance; letter-spacing:-.01em}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-3); font-weight:600}
+
+/* ---------- shell ---------- */
+.wrap{max-width:560px; margin:0 auto; padding:20px 18px 56px}
+.topbar{display:flex; align-items:baseline; gap:12px; margin-bottom:22px}
+.topbar .clock{font-family:var(--f-mono); font-size:13px; color:var(--ink-2)}
+.topbar h1{font-size:19px; margin-right:auto}
+.iconbtn{background:none; border:1px solid var(--line); border-radius:var(--r-s); padding:4px 9px; font-size:12px; color:var(--ink-2)}
+.iconbtn[aria-pressed="true"]{border-color:var(--accent); color:var(--accent)}
+
+/* ---------- focus band ---------- */
+.band{
+  border-left:3px solid var(--accent); padding:10px 0 10px 14px; margin:0 0 22px;
+  display:flex; flex-direction:column; gap:3px;
+}
+.band p{margin:0; font-family:var(--f-display); font-size:18px; font-weight:500; line-height:1.3}
+
+/* ---------- sleep math ---------- */
+.sleep{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l);
+  padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.sleep-row{display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap}
+.field{display:flex; flex-direction:column; gap:5px}
+.field label{font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-3); font-weight:600}
+.field input[type="time"], .field input[type="number"], .field input[type="text"]{
+  font-family:var(--f-mono); font-size:15px; padding:7px 9px; background:var(--ground);
+  color:var(--ink); border:1px solid var(--line-strong); border-radius:var(--r-s);
+}
+.arrow{color:var(--ink-3); padding-bottom:9px; font-size:15px}
+.wakeout{display:flex; flex-direction:column; gap:2px; padding-bottom:2px}
+.wakeout .val{font-family:var(--f-mono); font-size:26px; font-weight:600; color:var(--accent); line-height:1}
+.sleep .fine{font-size:12.5px; color:var(--ink-3); margin:12px 0 0}
+
+/* ---------- routine slabs ---------- */
+.slabs{display:flex; flex-direction:column; gap:12px; margin:22px 0}
+.slab{
+  position:relative; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-l); overflow:hidden; box-shadow:var(--shadow);
+}
+.slab .stripe{position:absolute; inset:0 auto 0 0; width:4px; background:var(--c,var(--accent))}
+.slab-in{padding:18px 20px 18px 22px; display:flex; flex-direction:column; gap:14px}
+.slab-head{display:flex; align-items:flex-start; gap:12px}
+.slab-head h2{font-size:22px; color:var(--c,var(--accent))}
+.slab-head .meta{margin-left:auto; text-align:right; font-family:var(--f-mono); font-size:12px; color:var(--ink-3); line-height:1.6}
+.slab-head .meta b{display:block; font-size:17px; font-weight:600; color:var(--ink)}
+.state{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2)}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--line-strong); flex:none}
+.dot.done{background:var(--good)}
+.dot.part{background:var(--c,var(--accent))}
+.slab-acts{display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+.btn{
+  border:1px solid transparent; border-radius:var(--r-s); padding:10px 16px;
+  font-weight:600; font-size:14.5px; background:var(--c,var(--accent)); color:var(--on-accent);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn.ghost{background:none; border-color:var(--line-strong); color:var(--ink-2); font-weight:500}
+.btn.ghost:hover{border-color:var(--ink-3); color:var(--ink)}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.toggle{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-2); cursor:pointer}
+.toggle input{accent-color:var(--c,var(--accent)); width:15px; height:15px}
+.peek{font-size:13px; color:var(--ink-3); line-height:1.55}
+.peek b{color:var(--ink-2); font-weight:500}
+
+/* ---------- progression ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l); padding:16px 18px; box-shadow:var(--shadow)}
+.panel + .panel{margin-top:12px}
+.panel h3{font-size:14px; margin-bottom:2px}
+.plank{display:flex; align-items:flex-end; gap:18px; margin-top:14px}
+.plankfig{display:flex; flex-direction:column; gap:1px; flex:none}
+.plankfig .val{font-family:var(--f-mono); font-size:30px; font-weight:600; line-height:1; color:var(--accent)}
+.plankfig .cap{font-size:11px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-3); font-weight:600}
+.bars{display:flex; align-items:flex-end; gap:4px; height:56px; flex:1; min-width:0}
+.bars span{flex:1; min-width:3px; background:var(--surface-2); border-radius:2px 2px 0 0; position:relative}
+.bars span.pb{background:var(--accent)}
+.bars span.cur{background:var(--ink-3)}
+.week{display:flex; gap:6px; margin-top:14px}
+.day{flex:1; display:flex; flex-direction:column; gap:4px; align-items:center}
+.day .lab{font-size:10px; color:var(--ink-3); font-family:var(--f-mono)}
+.day .cells{display:flex; flex-direction:column; gap:3px; width:100%}
+.cell{height:13px; border-radius:3px; background:var(--surface-2); border:1px solid transparent}
+.cell.m{background:var(--dawn)}
+.cell.e{background:var(--dusk)}
+.cell.partial{background:none; border:1px solid var(--line-strong)}
+.legend{display:flex; gap:14px; margin-top:11px; font-size:11.5px; color:var(--ink-3)}
+.legend i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px}
+.empty{font-size:13px; color:var(--ink-3); margin:10px 0 0}
+
+/* ---------- Übersicht ---------- */
+.seg{display:flex; gap:0; border:1px solid var(--line-strong); border-radius:var(--r-s); overflow:hidden; margin-bottom:16px}
+.seg button{flex:1; background:none; border:none; padding:9px 0; font-size:14px; font-weight:600; color:var(--ink-3)}
+.seg button + button{border-left:1px solid var(--line-strong)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.plansum{display:flex; gap:10px; margin-bottom:14px}
+.plansum .fig{flex:1}
+.plist{display:flex; flex-direction:column; border:1px solid var(--line); border-radius:var(--r-l); overflow:hidden; background:var(--surface); box-shadow:var(--shadow)}
+.prow{
+  display:grid; grid-template-columns:52px 12px 1fr auto; gap:10px; align-items:baseline;
+  padding:11px 14px; background:none; border:none; border-top:1px solid var(--line);
+  text-align:left; width:100%; font-size:15px;
+}
+.prow:first-child{border-top:none}
+.prow:hover{background:var(--surface-2)}
+.prow .off{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.prow .mark{width:8px; height:8px; border-radius:50%; background:var(--surface-2); align-self:center}
+.prow .mark.done{background:var(--accent)}
+.prow .mark.skip{background:none; border:1px solid var(--line-strong)}
+.prow .nm{min-width:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:7px}
+.prow .dur{font-family:var(--f-mono); font-size:13px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.prow.zero .dur{color:var(--ink-3)}
+.tag{font-size:10px; text-transform:uppercase; letter-spacing:.1em; font-weight:600; padding:2px 5px; border-radius:3px; background:var(--surface-2); color:var(--ink-3)}
+.tag.t{background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent)}
+.tag.sw{background:color-mix(in srgb, var(--accent) 30%, transparent); color:var(--accent)}
+.tag.mind{border:1px solid var(--line-strong); background:none}
+
+/* ---------- runner ---------- */
+.runner{
+  position:fixed; inset:0; background:var(--ground);
+  display:flex; flex-direction:column; z-index:20;
+  background-image:radial-gradient(120% 60% at 50% -10%, var(--wash), transparent 70%);
+}
+.sessionbar{
+  display:grid; grid-template-columns:auto 1fr auto; gap:10px 16px; align-items:center;
+  padding:12px 18px; border-bottom:1px solid var(--line);
+}
+.sessionbar .lead{display:flex; align-items:baseline; gap:10px; min-width:0}
+.sessionbar .elapsed{font-family:var(--f-mono); font-size:17px; font-weight:600}
+.sessionbar .soll{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); white-space:nowrap}
+.sessionbar .eta{font-size:12px; color:var(--ink-2); text-align:right; line-height:1.35}
+.sessionbar .eta b{font-family:var(--f-mono); font-size:14px; font-weight:600; color:var(--accent); display:block}
+.sessionbar .eta.late b{color:var(--alert)}
+.track{grid-column:1/-1; display:flex; gap:2px; height:5px}
+.track i{flex:1; background:var(--surface-2); border-radius:1px}
+.track i.done{background:var(--accent)}
+.track i.skip{background:var(--line-strong)}
+.track i.now{background:var(--ink)}
+
+.stage:has(.mind) .dial{width:164px; height:164px}
+.stage:has(.mind) h2{font-size:clamp(25px,6.6vw,34px)}
+.mind{
+  max-width:36ch; text-align:left; border-left:2px solid var(--accent);
+  padding:3px 0 3px 13px; display:flex; flex-direction:column; gap:4px;
+}
+.mind p{margin:0; font-family:var(--f-display); font-weight:500; font-size:17px; line-height:1.35}
+.stage{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:26px 22px; text-align:center; overflow-y:auto}
+.stepno{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); letter-spacing:.05em}
+.stage h2{font-size:clamp(30px,8.5vw,44px); line-height:1.05; max-width:19ch}
+.stage .note{font-size:15px; color:var(--ink-2); max-width:34ch; margin:0; line-height:1.5}
+.dial{position:relative; width:212px; height:212px; flex:none}
+.dial svg{width:100%; height:100%; transform:rotate(-90deg)}
+.dial .rail{fill:none; stroke:var(--surface-2); stroke-width:12}
+.dial .arc{fill:none; stroke:var(--accent); stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .18s linear}
+.dial .read{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px}
+.dial .read .t{font-family:var(--f-mono); font-size:40px; font-weight:600; line-height:1; letter-spacing:-.02em}
+.dial .read .u{font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-3); font-weight:600}
+.dial.paused .arc{stroke:var(--line-strong)}
+.dial.over .read .t{color:var(--alert)}
+.acts{display:flex; flex-direction:column; gap:10px; width:100%; max-width:330px}
+.acts .row{display:flex; gap:10px}
+.acts .row > *{flex:1}
+.btn.big{padding:16px; font-size:17px; justify-content:center; border-radius:var(--r-m)}
+.hint{font-size:12px; color:var(--ink-3)}
+
+.queue{border-top:1px solid var(--line); padding:12px 18px 16px; display:flex; flex-direction:column; gap:7px; background:var(--surface)}
+.queue .eyebrow{margin-bottom:1px}
+.qrow{display:flex; align-items:baseline; gap:10px; font-size:14px; color:var(--ink-2)}
+.qrow .qt{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); flex:none; width:44px; text-align:right}
+.qrow.second{opacity:.55; font-size:13px}
+.queue .exit{align-self:flex-start; margin-top:2px; font-size:12.5px; background:none; border:none; color:var(--ink-3); text-decoration:underline; padding:2px 0}
+
+/* reflect step */
+.reflect{display:flex; flex-direction:column; gap:16px; width:100%; max-width:400px; text-align:left}
+.reflect .q{display:flex; flex-direction:column; gap:7px}
+.reflect .q label{font-size:13.5px; font-weight:600}
+.reflect textarea{
+  font-family:var(--f-body); font-size:15px; padding:10px; min-height:62px; resize:vertical;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line-strong); border-radius:var(--r-s);
+}
+.scale{display:flex; gap:7px}
+.scale button{flex:1; padding:11px 0; background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r-s); font-family:var(--f-mono); font-size:15px}
+.scale button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+
+/* summary */
+.summary{display:flex; flex-direction:column; gap:20px; width:100%; max-width:400px; text-align:left}
+.summary .head{display:flex; flex-direction:column; gap:5px}
+.summary .head h2{font-size:32px; text-align:left}
+.figs{display:flex; gap:10px}
+.fig{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m); padding:12px 13px; display:flex; flex-direction:column; gap:3px}
+.fig .v{font-family:var(--f-mono); font-size:22px; font-weight:600; line-height:1}
+.fig .v.over{color:var(--alert)}
+.fig .v.under{color:var(--good)}
+.fig .k{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); font-weight:600}
+.skiplist{font-size:13.5px; color:var(--ink-2); line-height:1.6}
+.skiplist b{font-weight:600; color:var(--ink)}
+
+/* ---------- editor ---------- */
+.editor .row-h{display:flex; align-items:baseline; gap:12px; margin:26px 0 10px}
+.editor .row-h h2{font-size:17px; color:var(--c,var(--accent))}
+.editor .row-h .sum{margin-left:auto; font-family:var(--f-mono); font-size:12px; color:var(--ink-3)}
+.steplist{display:flex; flex-direction:column; gap:8px}
+.step{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m); padding:11px 12px; display:flex; flex-direction:column; gap:9px}
+.step .l1{display:flex; gap:8px; align-items:center}
+.step .l1 input[type="text"]{flex:1; min-width:0; font-family:var(--f-body); font-size:15px; padding:7px 9px; background:var(--ground); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-s)}
+.step .l2{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.step select, .step .dur{font-family:var(--f-mono); font-size:13px; padding:6px 8px; background:var(--ground); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-s)}
+.step .dur{width:74px}
+.step textarea{font-family:var(--f-body); font-size:13.5px; padding:8px 9px; background:var(--ground); color:var(--ink-2); border:1px solid var(--line); border-radius:var(--r-s); min-height:38px; resize:vertical}
+.mini{background:none; border:1px solid var(--line); border-radius:var(--r-s); padding:5px 8px; font-size:12px; color:var(--ink-3); line-height:1}
+.mini:hover{color:var(--ink); border-color:var(--line-strong)}
+.mini.del:hover{color:var(--alert); border-color:var(--alert)}
+.grab{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); width:20px; text-align:right; flex:none}
+.editor .foot{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center}
+.saved{font-size:12.5px; color:var(--good)}
+.settings{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px}
+
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
+@media (max-width:400px){
+  .dial{width:180px; height:180px}
+  .dial .read .t{font-size:34px}
+}
+</style>
+
+<div id="app"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Tagesgerüst — geführte Morgen- und Abendroutine
+   ============================================================ */
+
+const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+const uid = () => Math.random().toString(36).slice(2,9);
+
+const DEFAULT_CONFIG = {
+  v: 4,
+  promptCount: 3,
+  bedtime: "22:45",
+  sleepHours: 8,
+  fallAsleepMin: 15,
+  outBy: "07:45",
+  morning: [
+    {id:"m1",  name:"Aufstehen",                    type:"check",     sec:60,   note:"Füße auf den Boden, kein Snooze. Der Rest läuft von hier."},
+    {id:"m2",  name:"Toilette",                     type:"check",     sec:240,  note:""},
+    {id:"m3",  name:"Wasser + Kreatin",             type:"check",     sec:60,   note:"400 ml Wasser, 5 g Kreatin einrühren, ganz austrinken."},
+    {id:"m4",  name:"Berg–Tal",                     type:"check",     sec:60,   note:"3 Durchgänge."},
+    {id:"m5",  name:"Einbeinige Squats",            type:"timer",     sec:40,   note:"Im Wechsel, kontrolliert runter."},
+    {id:"m6",  name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 1 von 3."},
+    {id:"m7",  name:"Breitbeinig nach vorne",       type:"timer",     sec:40,   note:"Langer Rücken, Gewicht nach vorne verlagern.", mind:true},
+    {id:"m8",  name:"Butterfly",                    type:"timer",     sec:30,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", mind:true},
+    {id:"m9",  name:"Plank · Durchgang 1",          type:"stopwatch", sec:60,   note:"Bis kurz vor dem Zittern. Die Zeit wird mitgeschrieben."},
+    {id:"m10", name:"Leiste links",                 type:"timer",     sec:40,   note:"", mind:true},
+    {id:"m11", name:"Leiste rechts",                type:"timer",     sec:40,   note:"", mind:true},
+    {id:"m12", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 2 von 3."},
+    {id:"m13", name:"Oberschenkel innen links",     type:"timer",     sec:40,   note:"", mind:true},
+    {id:"m14", name:"Oberschenkel innen rechts",    type:"timer",     sec:40,   note:"", mind:true},
+    {id:"m15", name:"Plank · Durchgang 2",          type:"stopwatch", sec:60,   note:"Zweiter Durchgang. Wird getrennt getrackt."},
+    {id:"m16", name:"Hintern links",                type:"timer",     sec:30,   note:"", mind:true},
+    {id:"m17", name:"Hintern rechts",               type:"timer",     sec:30,   note:"", mind:true},
+    {id:"m18", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 3 von 3."},
+    {id:"m19", name:"Band über Kopf",               type:"timer",     sec:20,   note:"Rotatorenmanschette. Schultern unten lassen."},
+    {id:"m20", name:"Band auseinanderziehen",       type:"timer",     sec:30,   note:"Beide Arme, Schulterblätter zusammen."},
+    {id:"m21", name:"Band unten nach oben, links",  type:"timer",     sec:20,   note:""},
+    {id:"m22", name:"Band unten nach oben, rechts", type:"timer",     sec:20,   note:""},
+    {id:"m22i",name:"Igel",                         type:"timer",     sec:40,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", mind:true},
+    {id:"m23", name:"Facepulls · Satz 1",           type:"timer",     sec:20,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen."},
+    {id:"m24", name:"Pause",                        type:"timer",     sec:30,   note:"Kurz durchatmen, Band neu greifen.", mind:true},
+    {id:"m25", name:"Facepulls · Satz 2",           type:"timer",     sec:20,   note:"Letzte Übung. Danach ins Bad."},
+    {id:"m27", name:"Anziehen",                     type:"check",     sec:180,  note:"Das Outfit liegt von gestern Abend bereit."},
+    {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:""},
+    {id:"m29", name:"Gesicht & Haare",              type:"check",     sec:180,  note:""},
+    {id:"m30", name:"Frühstück",                    type:"check",     sec:600,  note:"Nach dem Wochenplan im Kalender."},
+    {id:"m31", name:"Tasche, Schlüssel, Handy",     type:"check",     sec:120,  note:"Einmal gegenprüfen statt zweimal suchen."},
+    {id:"m32", name:"Lichter & Geräte aus?",        type:"check",     sec:45,   note:"Bad, Küche, Herd, Wasserkocher, Fenster. Einmal die Runde."},
+    {id:"m33", name:"Raus",                         type:"check",     sec:0,    note:""}
+  ],
+  evening: [
+    {id:"e1", name:"Küche klar machen",             type:"check",   sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true},
+    {id:"e2", name:"Essen für morgen vorbereiten",  type:"timer",   sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box."},
+    {id:"e3", name:"Outfit rauslegen",              type:"check",   sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr."},
+    {id:"e4", name:"Tasche packen",                 type:"check",   sec:180,  note:""},
+    {id:"e5", name:"Handy weglegen",                type:"check",   sec:60,   note:"Ladekabel außerhalb des Schlafzimmers.", deadline:"phone"},
+    {id:"e6", name:"Zähne putzen",                  type:"timer",   sec:120,  note:""},
+    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display.", optional:true},
+    {id:"e8", name:"Drei Fragen",                   type:"reflect", sec:120,  note:""},
+    {id:"e9", name:"Wecker stellen",                type:"check",   sec:60,   note:"", deadline:"wake"},
+    {id:"e10",name:"Licht aus",                     type:"check",   sec:0,    note:""}
+  ]
+};
+
+const TYPE_LABEL = {check:"Häkchen", timer:"Timer", stopwatch:"Stoppuhr", reflect:"Fragen"};
+
+/* ---------------- helpers ---------------- */
+const pad = n => String(n).padStart(2,"0");
+const isoDay = (d=new Date()) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const clockOf = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function mmss(sec){
+  const s = Math.max(0, Math.round(sec));
+  return `${pad(Math.floor(s/60))}:${pad(s%60)}`;
+}
+function human(sec){
+  const s = Math.max(0, Math.round(sec));
+  if (s < 60) return `${s} s`;
+  const m = Math.round(s/60);
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)} h ${pad(m%60)}`;
+}
+function parseTime(t){
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(t||""));
+  return m ? {h:+m[1], m:+m[2]} : null;
+}
+function shiftTime(t, minutes){
+  const p = parseTime(t); if (!p) return "--:--";
+  let total = ((p.h*60 + p.m + Math.round(minutes)) % 1440 + 1440) % 1440;
+  return `${pad(Math.floor(total/60))}:${pad(total%60)}`;
+}
+function plusMinutes(date, minutes){ return new Date(date.getTime() + minutes*60000); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function activeSteps(list, shortMode){ return list.filter(s => !(shortMode && s.optional)); }
+function sumSec(list){ return list.reduce((a,s)=>a+(+s.sec||0), 0); }
+
+/* ---------------- store: db when available, localStorage always ---------------- */
+const LS = {
+  read(key, fallback){
+    try { const raw = localStorage.getItem("tg:"+key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  },
+  write(key, val){
+    try { localStorage.setItem("tg:"+key, JSON.stringify(val)); } catch(e){}
+  },
+  drop(key){ try { localStorage.removeItem("tg:"+key); } catch(e){} }
+};
+
+const store = {
+  db:null,
+  async connect(){
+    let db = null;
+    try { db = window.claude && claude.use ? await claude.use("db") : null; } catch(e){ db = null; }
+    if (!db) return false;
+    this.db = db;
+    try {
+      const snap = await db.doc("config/routines").get();
+      const remote = snap.exists ? snap.data() : null;
+      const usable = remote && Array.isArray(remote.morning) && remote.morning.length;
+      if (usable && (+remote.v || 0) >= DEFAULT_CONFIG.v) {
+        state.config = normalizeConfig(remote);
+        LS.write("config", state.config);
+      } else {
+        // no config yet, or one seeded from an older default list: take the
+        // current defaults but keep whatever times were already set
+        const keep = remote || {};
+        state.config = normalizeConfig(Object.assign({}, DEFAULT_CONFIG, {
+          bedtime: keep.bedtime || DEFAULT_CONFIG.bedtime,
+          outBy: keep.outBy || DEFAULT_CONFIG.outBy,
+          sleepHours: keep.sleepHours || DEFAULT_CONFIG.sleepHours,
+          promptCount: keep.promptCount != null ? keep.promptCount : DEFAULT_CONFIG.promptCount,
+          fallAsleepMin: keep.fallAsleepMin != null ? keep.fallAsleepMin : DEFAULT_CONFIG.fallAsleepMin
+        }));
+        LS.write("config", state.config);
+        await db.doc("config/routines").set(JSON.parse(JSON.stringify(state.config)));
+      }
+      const logs = await db.collection("logs").orderBy("date","desc").limit(80).get();
+      const seen = {};
+      logs.docs.forEach(d => { const v = d.data(); if (v) seen[d.id] = v; });
+      state.logs = Object.assign({}, state.logs, seen);
+      LS.write("logs", state.logs);
+      const planks = await db.collection("planks").orderBy("at","desc").limit(40).get();
+      const rows = planks.docs.map(d => d.data()).filter(Boolean);
+      if (rows.length) {
+        const merged = {};
+        state.planks.concat(rows).forEach(p => { if (p && p.at) merged[p.at] = p; });
+        state.planks = Object.values(merged).sort((a,b) => a.at < b.at ? -1 : 1).slice(-40);
+        LS.write("planks", state.planks);
+      }
+    } catch(e){ /* offline / revoked: localStorage carries on */ }
+    return true;
+  },
+  saveConfig(){
+    LS.write("config", state.config);
+    if (this.db) this.db.doc("config/routines").set(JSON.parse(JSON.stringify(state.config))).catch(()=>{});
+  },
+  saveLog(id, log){
+    state.logs[id] = log;
+    LS.write("logs", state.logs);
+    if (this.db) this.db.doc("logs/"+id).set(JSON.parse(JSON.stringify(log))).catch(()=>{});
+  },
+  savePlank(entry){
+    state.planks = state.planks.concat([entry]).slice(-40);
+    LS.write("planks", state.planks);
+    if (this.db) this.db.doc("planks/"+entry.at.replace(/[:.]/g,"-")).set(JSON.parse(JSON.stringify(entry))).catch(()=>{});
+  }
+};
+
+function normalizeConfig(raw){
+  const c = Object.assign({}, DEFAULT_CONFIG, raw || {});
+  ["morning","evening"].forEach(k => {
+    c[k] = (Array.isArray(c[k]) ? c[k] : DEFAULT_CONFIG[k]).map(s => ({
+      id: s.id || uid(),
+      name: String(s.name || "Schritt"),
+      type: TYPE_LABEL[s.type] ? s.type : "check",
+      sec: Math.max(0, Math.min(7200, Math.round(+s.sec || 0))),
+      note: String(s.note || ""),
+      optional: !!s.optional,
+      mind: !!s.mind,
+      deadline: s.deadline || null
+    }));
+  });
+  c.sleepHours = Math.min(12, Math.max(4, +c.sleepHours || 8));
+  c.fallAsleepMin = Math.min(90, Math.max(0, Math.round(+c.fallAsleepMin || 0)));
+  c.v = DEFAULT_CONFIG.v;
+  c.promptCount = Math.max(0, Math.min(8, Math.round(
+    c.prompts === false ? 0 : (c.promptCount != null ? +c.promptCount : DEFAULT_CONFIG.promptCount)
+  )));
+  delete c.prompts;
+  if (!parseTime(c.bedtime)) c.bedtime = DEFAULT_CONFIG.bedtime;
+  if (!parseTime(c.outBy)) c.outBy = DEFAULT_CONFIG.outBy;
+  return c;
+}
+
+/* ---------------- state ---------------- */
+const state = {
+  config: (() => {
+    const cached = LS.read("config", null);
+    return normalizeConfig(cached && (+cached.v || 0) >= DEFAULT_CONFIG.v ? cached : DEFAULT_CONFIG);
+  })(),
+  logs: LS.read("logs", {}),
+  planks: LS.read("planks", []),
+  view: "home",
+  planRoutine: "morning",
+  editing: null,
+  shortEvening: LS.read("shortEvening", false),
+  shortMorning: LS.read("shortMorning", false),
+  muted: LS.read("muted", false),
+  run: null,
+  savedFlash: false
+};
+
+function wakeTime(){
+  return shiftTime(state.config.bedtime, state.config.fallAsleepMin + state.config.sleepHours*60);
+}
+function phoneAway(){ return shiftTime(state.config.bedtime, -45); }
+function logId(day, routine){ return `${day}__${routine}`; }
+function logFor(day, routine){ return state.logs[logId(day, routine)] || null; }
+
+function focusOfToday(){
+  const y = isoDay(new Date(Date.now() - 864e5));
+  const cands = [logFor(isoDay(), "evening"), logFor(y, "evening")];
+  for (const l of cands) {
+    if (l && l.answers && l.answers.tomorrow && String(l.answers.tomorrow).trim()) {
+      return String(l.answers.tomorrow).trim();
+    }
+  }
+  return null;
+}
+
+/* ---------------- Denkanstöße ---------------- */
+const PROMPTS = [
+  "Was ist heute die eine Aufgabe, nach der sich der Tag gut anfühlt, selbst wenn sonst nichts klappt?",
+  "Welcher Termin heute macht dir am wenigsten Lust? Wie fängst du ihn an, damit er kürzer wird?",
+  "Was hast du gestern angefangen und nicht beendet? Heute abschließen oder streichen?",
+  "Was steht auf deiner Liste, das eigentlich niemand von dir erwartet?",
+  "Wen solltest du heute anrufen, statt zu schreiben?",
+  "Welche Entscheidung schiebst du seit über einer Woche vor dir her?",
+  "Wo im Körper sitzt gerade Spannung? Bleib zwei Atemzüge dort.",
+  "Wenn du heute nur drei Stunden arbeiten könntest — welche drei Dinge?",
+  "Was hat dich diese Woche zuletzt geärgert? War es das wert?",
+  "Welche Nachricht liegt unbeantwortet, weil die Antwort unangenehm ist?",
+  "Was war der beste Teil von gestern? Kommt der heute wieder vor?",
+  "Wofür wirst du heute keine Zeit haben, wenn du sie nicht jetzt einplanst?",
+  "Was machst du heute zum ersten Mal?",
+  "Was kostet dich gerade Energie, ohne dass es etwas bringt?",
+  "Was hast du zugesagt, obwohl du nicht wolltest? Lässt sich das noch drehen?",
+  "Woran merkst du heute Abend, dass der Tag gut war? Ein Satz.",
+  "Was ist an deiner Arbeit gerade der Teil, den du wirklich magst?",
+  "Welche zwei Dinge auf deiner Liste kannst du zusammenlegen?",
+  "Was schiebst du, weil du nicht weißt, wie es geht? Wen könntest du fragen?",
+  "Wer hat dir zuletzt geholfen, ohne dass du es erwähnt hast? Sag es heute.",
+  "Wie viel von deinem Tag ist schon fremdbestimmt? Bleibt genug übrig?",
+  "Was ist der kleinste erste Schritt bei der Sache, die dich am meisten nervt?",
+  "Wenn dein Tag heute genau wie geplant läuft — freust du dich darauf?",
+  "Was liest du gerade? Reicht es dir, oder ist es nur Gewohnheit?",
+  "Welches Problem hast du still akzeptiert, obwohl es lösbar ist?",
+  "Was möchtest du in einem Jahr über diese Woche sagen können?",
+  "Wo bist du zu schnell unterwegs und übersiehst deshalb etwas?",
+  "Was tust du heute für jemanden, der es nicht erwartet?",
+  "Welche Zahl in deinem Geschäft solltest du kennen und kennst sie nicht?",
+  "Was ist heute wichtiger: es sauber machen oder es fertig machen?",
+  "Wie fühlt sich dein Körper an — ausgeruht, oder tust du nur so?",
+  "Was würdest du heute anders machen, wenn niemand zuschaut?",
+  "Womit hast du dir diese Woche selbst im Weg gestanden?",
+  "Was hast du in den letzten Monaten aufgegeben, das dir eigentlich gefehlt hat?"
+];
+
+function seededOrder(seedStr, n){
+  let h = 2166136261;
+  for (let i = 0; i < seedStr.length; i++) { h ^= seedStr.charCodeAt(i); h = Math.imul(h, 16777619); }
+  let a = h >>> 0;
+  const rnd = () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ t>>>15, t | 1); t ^= t + Math.imul(t ^ t>>>7, t | 61); return ((t ^ t>>>14) >>> 0) / 4294967296; };
+  const idx = Array.from({length:n}, (_,i) => i);
+  for (let i = n-1; i > 0; i--) { const j = Math.floor(rnd()*(i+1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return idx;
+}
+
+/* ---------------- sound ---------------- */
+let audioCtx = null;
+function beep(freq=660, dur=0.14, gain=0.06){
+  if (state.muted) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur + 0.02);
+  } catch(e){}
+}
+const chimeStep = () => { beep(740, .13); setTimeout(()=>beep(988,.16), 130); };
+const chimeEnd  = () => { beep(523,.16); setTimeout(()=>beep(659,.16),150); setTimeout(()=>beep(784,.3),300); };
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function renderHome(){
+  document.documentElement.setAttribute("data-phase", new Date().getHours() < 15 ? "morning" : "evening");
+  const c = state.config;
+  const today = isoDay();
+  const focus = focusOfToday();
+
+  const mSteps = activeSteps(c.morning, state.shortMorning);
+  const eSteps = activeSteps(c.evening, state.shortEvening);
+
+  const el = document.createElement("div");
+  el.className = "wrap";
+  el.innerHTML = `
+    <div class="topbar">
+      <h1>Tagesgerüst</h1>
+      <span class="clock">${DAY_NAMES[new Date().getDay()]} ${pad(new Date().getDate())}.${pad(new Date().getMonth()+1)}. · <span id="now">${clockOf(new Date())}</span></span>
+      <button class="iconbtn" id="mute" aria-pressed="${state.muted}">${state.muted ? "Ton aus" : "Ton an"}</button>
+    </div>
+
+    ${focus ? `<div class="band">
+      <span class="eyebrow">Wichtigste Sache heute</span>
+      <p>${esc(focus)}</p>
+    </div>` : ""}
+
+    <div class="sleep">
+      <span class="eyebrow">Schlaffenster</span>
+      <div class="sleep-row" style="margin-top:10px">
+        <div class="field">
+          <label for="bed">Ins Bett um</label>
+          <input type="time" id="bed" value="${esc(c.bedtime)}">
+        </div>
+        <span class="arrow">→</span>
+        <div class="wakeout">
+          <span class="eyebrow">Wecker</span>
+          <span class="val mono" id="wake">${wakeTime()}</span>
+        </div>
+      </div>
+      <p class="fine">${c.sleepHours} h Schlaf plus ${c.fallAsleepMin} min Einschlafen. Handy weg ab <b class="mono">${phoneAway()}</b>.</p>
+    </div>
+
+    <div class="slabs">
+      ${slabHTML("morning", "Morgen", mSteps, logFor(today,"morning"), c)}
+      ${slabHTML("evening", "Abend", eSteps, logFor(today,"evening"), c)}
+    </div>
+
+    ${plankPanel()}
+    ${weekPanel()}
+
+    <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">
+      <button class="btn ghost" data-go="editor">Routinen bearbeiten</button>
+    </div>
+  `;
+  return el;
+}
+
+function slabHTML(routine, title, steps, log, c){
+  const color = routine === "morning" ? "var(--dawn)" : "var(--dusk)";
+  const total = sumSec(steps);
+  const done = log && log.finished;
+  const partial = log && !log.finished && log.doneCount > 0;
+  const first = steps.slice(0,3).map(s => s.name).join(" · ");
+  const projected = routine === "morning"
+    ? `Start jetzt → raus um <b>${clockOf(plusMinutes(new Date(), total/60))}</b>`
+    : `Start jetzt → im Bett um <b>${clockOf(plusMinutes(new Date(), total/60))}</b> (Ziel ${esc(c.bedtime)})`;
+
+  let stateLine;
+  if (done) {
+    stateLine = `<span class="state"><i class="dot done"></i>Heute erledigt in ${human(log.totalSec)}${log.skipped && log.skipped.length ? ` · ${log.skipped.length} übersprungen` : ""}</span>`;
+  } else if (partial) {
+    stateLine = `<span class="state"><i class="dot part"></i>Angefangen, ${log.doneCount} von ${log.stepCount} Schritten</span>`;
+  } else {
+    stateLine = `<span class="state"><i class="dot"></i>Heute noch offen</span>`;
+  }
+
+  return `
+  <div class="slab" style="--c:${color}">
+    <div class="stripe"></div>
+    <div class="slab-in">
+      <div class="slab-head">
+        <div>
+          <h2>${title}</h2>
+          ${stateLine}
+        </div>
+        <div class="meta"><b>${human(total)}</b>${steps.length} Schritte</div>
+      </div>
+      <p class="peek">${esc(first)} …<br>${projected}</p>
+      <div class="slab-acts">
+        <button class="btn" data-start="${routine}">${done ? "Nochmal starten" : partial ? "Weitermachen" : "Starten"}</button>
+        <button class="btn ghost" data-plan="${routine}">Ganze Routine</button>
+        ${routine === "evening"
+          ? `<label class="toggle"><input type="checkbox" id="shortEve" ${state.shortEvening ? "checked" : ""}>Kurzversion (Trainingstag)</label>`
+          : `<label class="toggle"><input type="checkbox" id="shortMorn" ${state.shortMorning ? "checked" : ""}>Kurzversion (wenig Zeit)</label>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function plankPanel(){
+  const rows = state.planks.slice(-14);
+  if (!rows.length) {
+    return `<div class="panel">
+      <span class="eyebrow">Plank</span>
+      <h3>Noch keine Zeit gemessen</h3>
+      <p class="empty">Der Plank-Schritt in der Morgenroutine ist eine Stoppuhr. Ab der ersten Messung steht hier die Entwicklung.</p>
+    </div>`;
+  }
+  const best = Math.max(...state.planks.map(p => p.sec));
+  const last = rows[rows.length-1];
+  const max = Math.max(best, 1);
+  const bars = rows.map((p,i) => {
+    const h = Math.max(6, Math.round(p.sec / max * 56));
+    const cls = p.sec >= best ? "pb" : (i === rows.length-1 ? "cur" : "");
+    return `<span class="${cls}" style="height:${h}px" title="${p.day}: ${p.sec} s"></span>`;
+  }).join("");
+  const delta = rows.length > 1 ? last.sec - rows[rows.length-2].sec : 0;
+  return `<div class="panel">
+    <span class="eyebrow">Plank</span>
+    <h3>Beste Zeit ${mmss(best)}</h3>
+    <div class="plank">
+      <div class="plankfig">
+        <span class="val">${mmss(last.sec)}</span>
+        <span class="cap">zuletzt ${delta > 0 ? "+"+delta+" s" : delta < 0 ? delta+" s" : "gleich"}</span>
+      </div>
+      <div class="bars">${bars}</div>
+    </div>
+  </div>`;
+}
+
+function weekPanel(){
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i*864e5);
+    const day = isoDay(d);
+    days.push({ day, lab: DAY_NAMES[d.getDay()], m: logFor(day,"morning"), e: logFor(day,"evening") });
+  }
+  const cellCls = (log, kind) => {
+    if (!log) return "cell";
+    if (log.finished) return "cell " + kind;
+    return "cell partial";
+  };
+  const cells = days.map(d => `
+    <div class="day">
+      <div class="cells">
+        <div class="${cellCls(d.m,"m")}" title="Morgen ${d.day}"></div>
+        <div class="${cellCls(d.e,"e")}" title="Abend ${d.day}"></div>
+      </div>
+      <span class="lab">${d.lab}</span>
+    </div>`).join("");
+  const runs = days.filter(d => d.m && d.m.finished).length;
+  return `<div class="panel">
+    <span class="eyebrow">Letzte sieben Tage</span>
+    <h3>${runs} von 7 Morgen komplett</h3>
+    <div class="week">${cells}</div>
+    <div class="legend">
+      <span><i style="background:var(--dawn)"></i>Morgen</span>
+      <span><i style="background:var(--dusk)"></i>Abend</span>
+      <span><i style="border:1px solid var(--line-strong)"></i>angefangen</span>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   RUNNER
+   ============================================================ */
+function startRun(routine, resume, fromIdx){
+  const short = routine === "evening" ? state.shortEvening : state.shortMorning;
+  const list = activeSteps(state.config[routine], short);
+  if (!list.length) return;
+  document.documentElement.setAttribute("data-phase", routine);
+  document.documentElement.style.setProperty("--wash",
+    routine === "morning" ? "color-mix(in srgb, var(--dawn) 11%, transparent)"
+                          : "color-mix(in srgb, var(--dusk) 13%, transparent)");
+  if (resume) {
+    state.run = resume;
+  } else {
+    state.run = {
+      routine, day: isoDay(),
+      steps: withPrompts(list),
+      idx: 0, startedAt: Date.now(), phase:"run",
+      stepEndsAt: null, stepStartedAt: Date.now(), paused: false, pausedLeft: 0,
+      swRunning: false, swStartedAt: 0, swSec: 0,
+      answers: { energy:null, good:"", tomorrow:"" }
+    };
+    if (fromIdx > 0) state.run.idx = Math.min(fromIdx, state.run.steps.length - 1);
+  }
+  enterStep(true);
+  render();
+  tickLoop();
+}
+
+function withPrompts(list){
+  const steps = list.map(s => ({ id:s.id, name:s.name, type:s.type, sec:s.sec, note:s.note,
+                                 deadline:s.deadline || null, status:"open", actual:0, prompt:null }));
+  const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
+  if (!want) return steps;
+  // candidates are the marked holds; which of them get a question rotates daily
+  const cands = list.map((s,i) => s.mind ? i : -1).filter(i => i >= 0);
+  if (!cands.length) return steps;
+  const chosen = seededOrder(isoDay()+"#pick", cands.length)
+    .slice(0, Math.min(want, cands.length))
+    .map(k => cands[k])
+    .sort((a,b) => a-b);
+  const order = seededOrder(isoDay(), PROMPTS.length);
+  const focus = focusOfToday();
+  chosen.forEach((si, k) => {
+    steps[si].prompt = (k === 0 && focus)
+      ? `Wichtigste Sache heute: „${focus}“. Was ist der erste konkrete Schritt?`
+      : PROMPTS[order[k % PROMPTS.length]];
+  });
+  return steps;
+}
+
+function currentStep(){ const r = state.run; return r && r.steps[r.idx] ? r.steps[r.idx] : null; }
+
+function enterStep(initial){
+  const r = state.run, s = currentStep();
+  if (!s) return;
+  r.stepStartedAt = Date.now();
+  r.paused = false; r.pausedLeft = 0;
+  r.swRunning = false; r.swSec = 0; r.swStartedAt = 0;
+  r.fired = false;
+  r.stepEndsAt = s.type === "timer" && s.sec > 0 ? Date.now() + s.sec*1000 : null;
+  if (!initial) persistRun();
+}
+
+function advance(status){
+  const r = state.run, s = currentStep();
+  if (!s) return;
+  s.status = status;
+  s.actual = status === "skipped" ? 0 : Math.round((Date.now() - r.stepStartedAt)/1000);
+  if (s.type === "stopwatch" && status === "done" && r.swSec > 0) {
+    s.actual = r.swSec;
+    store.savePlank({ at:new Date().toISOString(), day:r.day, sec:r.swSec });
+  }
+  writeLog(false);
+  if (r.idx >= r.steps.length - 1) {
+    r.phase = "summary";
+    r.endedAt = Date.now();
+    writeLog(true);
+    chimeEnd();
+    LS.drop("run");
+  } else {
+    r.idx += 1;
+    enterStep(false);
+  }
+  render();
+}
+
+function writeLog(finished){
+  const r = state.run;
+  const doneSteps = r.steps.filter(s => s.status === "done");
+  const log = {
+    date: r.day, routine: r.routine,
+    startedAt: new Date(r.startedAt).toISOString(),
+    endedAt: finished ? new Date(r.endedAt || Date.now()).toISOString() : null,
+    finished: !!finished,
+    totalSec: Math.round(((finished ? (r.endedAt || Date.now()) : Date.now()) - r.startedAt)/1000),
+    targetSec: sumSec(r.steps),
+    stepCount: r.steps.length,
+    doneCount: doneSteps.length,
+    skipped: r.steps.filter(s => s.status === "skipped").map(s => s.name),
+    planks: r.steps.filter(s => s.type === "stopwatch" && s.actual > 0).map(s => s.actual),
+    stepStates: r.steps.map(s => ({ id:s.id, status:s.status, actual:s.actual })),
+    answers: r.routine === "evening" ? r.answers : undefined
+  };
+  store.saveLog(logId(r.day, r.routine), log);
+}
+
+function persistRun(){
+  if (state.run && state.run.phase === "run") LS.write("run", state.run);
+}
+
+function remainingTargetSec(){
+  const r = state.run;
+  return r.steps.slice(r.idx).reduce((a,s)=>a+(+s.sec||0), 0);
+}
+
+function quitRun(){
+  writeLog(false);
+  LS.drop("run");
+  state.run = null;
+  document.documentElement.style.setProperty("--wash","transparent");
+  render();
+}
+
+let rafHandle = null;
+function tickLoop(){
+  if (rafHandle) return;
+  const step = () => {
+    if (!state.run || state.run.phase !== "run") { rafHandle = null; return; }
+    paintLive();
+    rafHandle = setTimeout(step, 200);
+  };
+  rafHandle = setTimeout(step, 200);
+}
+
+function paintLive(){
+  const r = state.run; if (!r) return;
+  const s = currentStep(); if (!s) return;
+
+  const elapsed = (Date.now() - r.startedAt)/1000;
+  const eEl = document.getElementById("elapsed");
+  if (eEl) eEl.textContent = mmss(elapsed);
+
+  const etaEl = document.getElementById("eta");
+  if (etaEl) {
+    let leftSec = remainingTargetSec();
+    if (s.type === "timer" && r.stepEndsAt && !r.paused) {
+      leftSec = leftSec - s.sec + Math.max(0, (r.stepEndsAt - Date.now())/1000);
+    }
+    const at = plusMinutes(new Date(), leftSec/60);
+    etaEl.textContent = clockOf(at);
+    const box = etaEl.closest(".eta");
+    if (box) {
+      const target = parseTime(r.routine === "morning" ? state.config.outBy : state.config.bedtime);
+      if (target) {
+        const t = new Date(); t.setHours(target.h, target.m, 0, 0);
+        if (r.routine === "evening" && target.h < 12) t.setDate(t.getDate()+1);
+        box.classList.toggle("late", at.getTime() > t.getTime() + 60000);
+      }
+    }
+  }
+
+  if (s.type === "timer" && r.stepEndsAt) {
+    const leftMs = r.paused ? r.pausedLeft : (r.stepEndsAt - Date.now());
+    const left = leftMs/1000;
+    const tEl = document.getElementById("dialtime");
+    if (tEl) tEl.textContent = mmss(Math.abs(left));
+    const arc = document.getElementById("arc");
+    if (arc) {
+      const C = 540.35;
+      const p = Math.min(1, Math.max(0, 1 - left/Math.max(1, s.sec)));
+      arc.setAttribute("stroke-dashoffset", String(C*(1-p)));
+    }
+    const dial = document.getElementById("dial");
+    if (dial) dial.classList.toggle("over", left < 0);
+    if (left <= 0 && !r.paused && !r.fired) {
+      r.fired = true;
+      chimeStep();
+      setTimeout(() => { if (state.run && currentStep() === s) { r.fired = false; advance("done"); } }, 400);
+    }
+  }
+  if (s.type === "stopwatch" && r.swRunning) {
+    const sec = (Date.now() - r.swStartedAt)/1000;
+    const tEl = document.getElementById("dialtime");
+    if (tEl) tEl.textContent = mmss(sec);
+    const arc = document.getElementById("arc");
+    if (arc) {
+      const C = 540.35;
+      const best = state.planks.length ? Math.max(...state.planks.map(p=>p.sec)) : Math.max(30, s.sec);
+      const p = Math.min(1, sec/Math.max(1,best));
+      arc.setAttribute("stroke-dashoffset", String(C*(1-p)));
+    }
+  }
+}
+
+function renderRunner(){
+  const r = state.run;
+  const el = document.createElement("div");
+  el.className = "runner";
+  if (r.phase === "summary") { el.innerHTML = summaryHTML(); return el; }
+
+  const s = currentStep();
+  const target = sumSec(r.steps);
+  const trackHTML = r.steps.map((st,i) => {
+    const cls = i === r.idx ? "now" : st.status === "done" ? "done" : st.status === "skipped" ? "skip" : "";
+    return `<i class="${cls}"></i>`;
+  }).join("");
+  const q1 = r.steps[r.idx+1], q2 = r.steps[r.idx+2];
+  const etaLabel = r.routine === "morning" ? "raus um" : "im Bett um";
+
+  el.innerHTML = `
+    <div class="sessionbar">
+      <div class="lead">
+        <span class="elapsed mono" id="elapsed">${mmss((Date.now()-r.startedAt)/1000)}</span>
+        <span class="soll">von ${human(target)} Soll</span>
+      </div>
+      <span></span>
+      <div class="eta">${etaLabel}<b class="mono" id="eta">--:--</b></div>
+      <div class="track">${trackHTML}</div>
+    </div>
+    <div class="stage">${stageHTML(s, r)}</div>
+    <div class="queue">
+      <span class="eyebrow">Als nächstes</span>
+      ${q1 ? `<div class="qrow"><span class="qt mono">${q1.sec ? mmss(q1.sec) : "—"}</span>${esc(q1.name)}</div>` : `<div class="qrow"><span class="qt mono">—</span>letzter Schritt</div>`}
+      ${q2 ? `<div class="qrow second"><span class="qt mono">${q2.sec ? mmss(q2.sec) : "—"}</span>${esc(q2.name)}</div>` : ""}
+      <button class="exit" id="quit">Routine abbrechen</button>
+    </div>
+  `;
+  return el;
+}
+
+function deadlineNote(s){
+  if (s.deadline === "phone") return `Ab <b class="mono">${phoneAway()}</b> — 45 Minuten vor dem Zubettgehen.`;
+  if (s.deadline === "wake") return `Wecker auf <b class="mono">${wakeTime()}</b> für ${state.config.sleepHours} h Schlaf.`;
+  return "";
+}
+
+function stageHTML(s, r){
+  const no = `Schritt ${r.idx+1} von ${r.steps.length}`;
+  const dl = deadlineNote(s);
+  const note = s.note ? `<p class="note">${esc(s.note)}</p>` : "";
+  const dlp = dl ? `<p class="note">${dl}</p>` : "";
+  const mind = s.prompt ? `<div class="mind"><span class="eyebrow">Denkanstoß</span><p>${esc(s.prompt)}</p></div>` : "";
+
+  if (s.type === "reflect") {
+    const a = r.answers;
+    return `
+      <span class="stepno mono">${no}</span>
+      <h2>${esc(s.name)}</h2>
+      <div class="reflect">
+        <div class="q">
+          <label>Energie heute</label>
+          <div class="scale">${[1,2,3,4,5].map(n => `<button data-energy="${n}" aria-pressed="${a.energy===n}">${n}</button>`).join("")}</div>
+        </div>
+        <div class="q">
+          <label for="qgood">Was lief gut?</label>
+          <textarea id="qgood" placeholder="Ein Satz reicht.">${esc(a.good)}</textarea>
+        </div>
+        <div class="q">
+          <label for="qtom">Wichtigste Sache morgen</label>
+          <textarea id="qtom" placeholder="Steht morgen früh auf dem Startbildschirm.">${esc(a.tomorrow)}</textarea>
+        </div>
+      </div>
+      <div class="acts">
+        <button class="btn big" data-act="done">Speichern & weiter</button>
+        <button class="btn ghost" data-act="skip">Heute überspringen</button>
+      </div>`;
+  }
+
+  if (s.type === "stopwatch") {
+    const best = state.planks.length ? Math.max(...state.planks.map(p=>p.sec)) : 0;
+    return `
+      <span class="stepno mono">${no}</span>
+      <h2>${esc(s.name)}</h2>
+      ${note}
+      ${dial(r.swRunning ? 0 : (r.swSec || 0), false)}
+      <div class="acts">
+        ${r.swRunning
+          ? `<button class="btn big" data-act="swstop">Stopp</button>`
+          : r.swSec > 0
+            ? `<div class="row"><button class="btn big" data-act="done">Weiter</button><button class="btn ghost big" data-act="swreset">Nochmal</button></div>`
+            : `<button class="btn big" data-act="swstart">Stoppuhr starten</button>`}
+        ${r.swSec > 0 ? `<span class="hint">${r.swSec} s gehalten${best ? ` · Bestzeit ${mmss(best)}` : ""}</span>`
+                      : best ? `<span class="hint">Bestzeit ${mmss(best)} — Ring füllt sich bis dahin.</span>` : `<span class="hint">Erste Messung: einfach halten, bis es nicht mehr geht.</span>`}
+        <button class="btn ghost" data-act="skip">Überspringen</button>
+      </div>`;
+  }
+
+  if (s.type === "timer" && s.sec > 0) {
+    return `
+      <span class="stepno mono">${no}</span>
+      <h2>${esc(s.name)}</h2>
+      ${note}${dlp}${mind}
+      ${dial(s.sec, r.paused)}
+      <div class="acts">
+        <div class="row">
+          <button class="btn big" data-act="done">Fertig</button>
+          <button class="btn ghost big" data-act="pause">${r.paused ? "Weiter" : "Pause"}</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost" data-act="plus">+30 s</button>
+          <button class="btn ghost" data-act="skip">Überspringen</button>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <span class="stepno mono">${no}</span>
+    <h2>${esc(s.name)}</h2>
+    ${note}${dlp}${mind}
+    ${s.sec ? `<span class="stepno mono">geplant ${human(s.sec)}</span>` : ""}
+    <div class="acts">
+      <button class="btn big" data-act="done">Erledigt</button>
+      <button class="btn ghost" data-act="skip">Überspringen</button>
+    </div>`;
+}
+
+function dial(sec, paused){
+  return `<div class="dial${paused ? " paused" : ""}" id="dial">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle class="rail" cx="100" cy="100" r="86"></circle>
+      <circle class="arc" id="arc" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="540.35"></circle>
+    </svg>
+    <div class="read">
+      <span class="t mono" id="dialtime">${mmss(sec)}</span>
+      <span class="u">${paused ? "Pause" : "Sekunden"}</span>
+    </div>
+  </div>`;
+}
+
+function summaryHTML(){
+  const r = state.run;
+  const total = Math.round(((r.endedAt || Date.now()) - r.startedAt)/1000);
+  const target = sumSec(r.steps);
+  const diff = total - target;
+  const skipped = r.steps.filter(s => s.status === "skipped");
+  const planks = r.steps.filter(s => s.type === "stopwatch" && s.actual > 0);
+  const earlier = state.planks.slice(0, Math.max(0, state.planks.length - planks.length));
+  const prevBest = earlier.length ? Math.max(...earlier.map(p=>p.sec)) : 0;
+  const bestToday = planks.length ? Math.max(...planks.map(s=>s.actual)) : 0;
+  const done = clockOf(new Date(r.endedAt || Date.now()));
+  const headline = r.routine === "morning"
+    ? (diff <= 0 ? "Schneller als geplant raus." : "Durch. Etwas über der Zeit.")
+    : "Abend abgeschlossen.";
+  const tail = r.routine === "morning"
+    ? `Fertig um <b>${done}</b> · Ziel war ${esc(state.config.outBy)}`
+    : `Fertig um <b>${done}</b> · Wecker steht auf ${wakeTime()}`;
+
+  return `<div class="stage"><div class="summary">
+    <div class="head">
+      <span class="eyebrow">${r.routine === "morning" ? "Morgen" : "Abend"} · ${DAY_NAMES[new Date().getDay()]}</span>
+      <h2>${headline}</h2>
+      <p class="note" style="max-width:none">${tail}</p>
+    </div>
+    <div class="figs">
+      <div class="fig"><span class="v mono ${diff > 0 ? "over" : "under"}">${mmss(total)}</span><span class="k">gebraucht</span></div>
+      <div class="fig"><span class="v mono">${diff >= 0 ? "+" : "−"}${mmss(Math.abs(diff))}</span><span class="k">zum Soll</span></div>
+      <div class="fig"><span class="v mono">${r.steps.filter(s=>s.status==="done").length}/${r.steps.length}</span><span class="k">Schritte</span></div>
+    </div>
+    ${planks.length ? `<p class="skiplist">Plank: <b>${planks.map(s=>mmss(s.actual)).join(" · ")}</b>${prevBest ? (bestToday > prevBest ? ` — neue Bestzeit, vorher ${mmss(prevBest)}.` : ` · Bestzeit ${mmss(prevBest)}.`) : "."}</p>` : ""}
+    ${skipped.length ? `<p class="skiplist">Übersprungen: <b>${skipped.map(s=>esc(s.name)).join(", ")}</b></p>`
+                     : `<p class="skiplist">Nichts übersprungen.</p>`}
+    ${r.routine === "evening" && r.answers.tomorrow ? `<p class="skiplist">Morgen zuerst: <b>${esc(r.answers.tomorrow)}</b></p>` : ""}
+    <div class="acts" style="max-width:none">
+      <button class="btn big" data-act="close">Zurück zur Übersicht</button>
+    </div>
+  </div></div>`;
+}
+
+/* ============================================================
+   ÜBERSICHT
+   ============================================================ */
+function renderPlan(){
+  const routine = state.planRoutine;
+  document.documentElement.setAttribute("data-phase", routine);
+  const short = routine === "evening" ? state.shortEvening : state.shortMorning;
+  const steps = activeSteps(state.config[routine], short);
+  const total = sumSec(steps);
+  const log = logFor(isoDay(), routine);
+  const states = {};
+  if (log && Array.isArray(log.stepStates)) log.stepStates.forEach(x => { states[x.id] = x; });
+  const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
+
+  let off = 0;
+  const rows = steps.map((st, i) => {
+    const start = off; off += (+st.sec || 0);
+    const mk = states[st.id];
+    const mark = mk && mk.status === "done" ? "mark done" : mk && mk.status === "skipped" ? "mark skip" : "mark";
+    const tags = [
+      st.type === "timer" ? `<i class="tag t">Timer</i>` : "",
+      st.type === "stopwatch" ? `<i class="tag sw">Stoppuhr</i>` : "",
+      st.type === "reflect" ? `<i class="tag t">Fragen</i>` : "",
+      st.mind && want ? `<i class="tag mind">Denkanstoß</i>` : "",
+      st.optional ? `<i class="tag">optional</i>` : ""
+    ].join("");
+    return `<button class="prow${st.sec ? "" : " zero"}" data-jump="${i}" data-routine="${routine}">
+      <span class="off">+${mmss(start)}</span>
+      <span class="${mark}"></span>
+      <span class="nm">${esc(st.name)}${tags}</span>
+      <span class="dur">${st.sec ? human(st.sec) : "—"}</span>
+    </button>`;
+  }).join("");
+
+  const el = document.createElement("div");
+  el.className = "wrap";
+  el.innerHTML = `
+    <div class="topbar">
+      <h1>Ganze Routine</h1>
+      <button class="iconbtn" data-go="home">Fertig</button>
+    </div>
+    <div class="seg">
+      <button data-plan="morning" aria-pressed="${routine === "morning"}">Morgen</button>
+      <button data-plan="evening" aria-pressed="${routine === "evening"}">Abend</button>
+    </div>
+    <div class="plansum">
+      <div class="fig"><span class="v mono">${human(total)}</span><span class="k">Soll gesamt</span></div>
+      <div class="fig"><span class="v mono">${steps.length}</span><span class="k">Schritte</span></div>
+      <div class="fig"><span class="v mono">${clockOf(plusMinutes(new Date(), total/60))}</span><span class="k">${routine === "morning" ? "raus ab jetzt" : "im Bett ab jetzt"}</span></div>
+    </div>
+    <div class="plist">${rows}</div>
+    <p class="empty">Die linke Spalte ist die Zeit ab Start. Tippe einen Schritt, um dort einzusteigen — praktisch, wenn du die Hälfte schon erledigt hast.${want ? ` Von den ${steps.filter(x=>x.mind).length} markierten Schritten bekommen täglich ${want} einen Denkanstoß, wechselnd.` : ""}</p>
+    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap">
+      <button class="btn" data-start="${routine}">Von vorn starten</button>
+      <button class="btn ghost" data-go="editor">Bearbeiten</button>
+    </div>
+  `;
+  return el;
+}
+
+/* ============================================================
+   EDITOR
+   ============================================================ */
+function renderEditor(){
+  document.documentElement.setAttribute("data-phase", "morning");
+  const c = state.config;
+  const el = document.createElement("div");
+  el.className = "wrap editor";
+  el.innerHTML = `
+    <div class="topbar">
+      <h1>Routinen bearbeiten</h1>
+      <button class="iconbtn" data-go="home">Fertig</button>
+    </div>
+    <div class="panel">
+      <span class="eyebrow">Zeiten</span>
+      <div class="settings">
+        <div class="field"><label for="s-bed">Ins Bett</label><input type="time" id="s-bed" value="${esc(c.bedtime)}"></div>
+        <div class="field"><label for="s-sleep">Schlaf (h)</label><input type="number" id="s-sleep" min="4" max="12" step="0.5" value="${c.sleepHours}"></div>
+        <div class="field"><label for="s-fall">Einschlafen (min)</label><input type="number" id="s-fall" min="0" max="90" step="5" value="${c.fallAsleepMin}"></div>
+        <div class="field"><label for="s-out">Raus bis</label><input type="time" id="s-out" value="${esc(c.outBy)}"></div>
+      </div>
+      <label class="toggle" style="margin-top:14px"><input type="checkbox" id="s-prompts" ${c.prompts !== false ? "checked" : ""}>Denkanstöße bei den markierten Schritten zeigen</label>
+    </div>
+    ${editorList("morning","Morgenroutine","var(--dawn)")}
+    ${editorList("evening","Abendroutine","var(--dusk)")}
+    <div class="foot">
+      <button class="btn ghost" data-go="home">Zurück</button>
+      <button class="btn ghost" id="reset">Auf Vorgabe zurücksetzen</button>
+      <span class="saved" id="savedflag" hidden>gespeichert</span>
+    </div>
+  `;
+  return el;
+}
+
+function editorList(routine, title, color){
+  const list = state.config[routine];
+  const rows = list.map((s,i) => `
+    <div class="step" data-routine="${routine}" data-idx="${i}">
+      <div class="l1">
+        <span class="grab mono">${pad(i+1)}</span>
+        <input type="text" value="${esc(s.name)}" data-f="name" aria-label="Name">
+        <button class="mini" data-mv="-1" aria-label="nach oben">↑</button>
+        <button class="mini" data-mv="1" aria-label="nach unten">↓</button>
+        <button class="mini del" data-del="1" aria-label="löschen">✕</button>
+      </div>
+      <div class="l2">
+        <select data-f="type" aria-label="Art"${s.type === "reflect" ? " disabled" : ""}>
+          ${["check","timer","stopwatch"].map(t => `<option value="${t}" ${s.type===t?"selected":""}>${TYPE_LABEL[t]}</option>`).join("")}
+          ${s.type === "reflect" ? `<option value="reflect" selected>Fragen</option>` : ""}
+        </select>
+        <input class="dur" type="text" inputmode="numeric" value="${mmss(s.sec)}" data-f="sec" aria-label="Dauer mm:ss">
+        <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="optional" ${s.optional?"checked":""}>optional</label>
+        <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="mind" ${s.mind?"checked":""}>Denkanstoß</label>
+      </div>
+      <textarea data-f="note" placeholder="Hinweis, der beim Schritt steht">${esc(s.note)}</textarea>
+    </div>`).join("");
+  return `
+    <div class="row-h" style="--c:${color}">
+      <h2>${title}</h2>
+      <span class="sum">${list.length} Schritte · ${human(sumSec(list))}</span>
+    </div>
+    <div class="steplist">${rows}</div>
+    <div class="foot"><button class="btn ghost" data-add="${routine}">Schritt hinzufügen</button></div>`;
+}
+
+/* ============================================================
+   RENDER + EVENTS
+   ============================================================ */
+const app = document.getElementById("app");
+
+function render(){
+  const scroll = window.scrollY;
+  app.textContent = "";
+  if (state.run) app.appendChild(renderRunner());
+  else if (state.view === "plan") app.appendChild(renderPlan());
+  else if (state.view === "editor") app.appendChild(renderEditor());
+  else app.appendChild(renderHome());
+  if (!state.run) window.scrollTo(0, state.view === "editor" ? scroll : scroll);
+  if (state.run && state.run.phase === "run") { paintLive(); tickLoop(); }
+  if (state.savedFlash) {
+    const f = document.getElementById("savedflag");
+    if (f) { f.hidden = false; setTimeout(()=>{ f.hidden = true; }, 1400); }
+    state.savedFlash = false;
+  }
+}
+
+function parseDur(v){
+  const t = String(v).trim();
+  if (/^\d{1,2}:\d{1,2}$/.test(t)) { const [a,b] = t.split(":").map(Number); return a*60 + b; }
+  const n = parseInt(t, 10);
+  return isNaN(n) ? 0 : n;
+}
+
+app.addEventListener("click", e => {
+  const t = e.target.closest("button, [data-go]");
+  if (!t) return;
+
+  if (t.dataset.go) { state.view = t.dataset.go; state.run = null; render(); return; }
+  if (t.dataset.plan) { state.planRoutine = t.dataset.plan; state.view = "plan"; state.run = null; render(); return; }
+  if (t.dataset.jump) { startRun(t.dataset.routine, null, +t.dataset.jump); return; }
+  if (t.dataset.start) { startRun(t.dataset.start); return; }
+  if (t.id === "quit") { quitRun(); return; }
+  if (t.id === "mute") { state.muted = !state.muted; LS.write("muted", state.muted); render(); return; }
+  if (t.id === "reset") {
+    state.config = normalizeConfig(DEFAULT_CONFIG);
+    store.saveConfig(); state.savedFlash = true; render(); return;
+  }
+  if (t.dataset.add) {
+    const r = t.dataset.add;
+    state.config[r] = state.config[r].concat([{ id:uid(), name:"Neuer Schritt", type:"check", sec:60, note:"", optional:false, deadline:null }]);
+    store.saveConfig(); render(); return;
+  }
+  if (t.dataset.energy) {
+    state.run.answers.energy = +t.dataset.energy;
+    render(); return;
+  }
+
+  const stepBox = t.closest(".step");
+  if (stepBox) {
+    const routine = stepBox.dataset.routine, i = +stepBox.dataset.idx;
+    const list = state.config[routine];
+    if (t.dataset.del) { list.splice(i,1); store.saveConfig(); render(); return; }
+    if (t.dataset.mv) {
+      const j = i + (+t.dataset.mv);
+      if (j >= 0 && j < list.length) { const [x] = list.splice(i,1); list.splice(j,0,x); store.saveConfig(); render(); }
+      return;
+    }
+  }
+
+  const act = t.dataset.act;
+  if (!act || !state.run) return;
+  const r = state.run, s = currentStep();
+  if (act === "close") { state.run = null; document.documentElement.style.setProperty("--wash","transparent"); render(); return; }
+  if (act === "done") {
+    if (s && s.type === "reflect") {
+      const g = document.getElementById("qgood"), tm = document.getElementById("qtom");
+      if (g) r.answers.good = g.value; if (tm) r.answers.tomorrow = tm.value;
+    }
+    advance("done"); return;
+  }
+  if (act === "skip") { advance("skipped"); return; }
+  if (act === "pause") {
+    if (r.paused) { r.stepEndsAt = Date.now() + r.pausedLeft; r.paused = false; }
+    else { r.pausedLeft = Math.max(0, r.stepEndsAt - Date.now()); r.paused = true; }
+    render(); return;
+  }
+  if (act === "plus") {
+    if (r.paused) r.pausedLeft += 30000; else r.stepEndsAt += 30000;
+    if (s) s.sec += 30;
+    render(); return;
+  }
+  if (act === "swstart") { r.swRunning = true; r.swStartedAt = Date.now(); r.swSec = 0; beep(520,.1); render(); return; }
+  if (act === "swstop") {
+    r.swRunning = false;
+    r.swSec = Math.round((Date.now() - r.swStartedAt)/1000);
+    chimeStep(); render(); return;
+  }
+  if (act === "swreset") { r.swSec = 0; r.swRunning = false; render(); return; }
+});
+
+app.addEventListener("change", e => {
+  const el = e.target;
+  if (el.id === "bed") {
+    state.config.bedtime = el.value || state.config.bedtime;
+    store.saveConfig(); render(); return;
+  }
+  if (el.id === "shortEve") {
+    state.shortEvening = el.checked; LS.write("shortEvening", state.shortEvening); render(); return;
+  }
+  if (el.id === "shortMorn") {
+    state.shortMorning = el.checked; LS.write("shortMorning", state.shortMorning); render(); return;
+  }
+  if (el.id === "s-pcount") {
+    state.config.promptCount = Math.max(0, Math.min(8, Math.round(+el.value || 0)));
+    el.value = state.config.promptCount;
+    store.saveConfig(); return;
+  }
+  if (["s-bed","s-sleep","s-fall","s-out"].includes(el.id)) {
+    const c = state.config;
+    if (el.id === "s-bed") c.bedtime = el.value || c.bedtime;
+    if (el.id === "s-out") c.outBy = el.value || c.outBy;
+    if (el.id === "s-sleep") c.sleepHours = +el.value || c.sleepHours;
+    if (el.id === "s-fall") c.fallAsleepMin = +el.value || 0;
+    state.config = normalizeConfig(c);
+    store.saveConfig(); state.savedFlash = true;
+    const f = document.getElementById("savedflag");
+    if (f) { f.hidden = false; setTimeout(()=>{ f.hidden = true; }, 1400); state.savedFlash = false; }
+    return;
+  }
+  const box = el.closest(".step");
+  if (box && el.dataset.f) {
+    const list = state.config[box.dataset.routine], s = list[+box.dataset.idx];
+    if (!s) return;
+    const f = el.dataset.f;
+    if (f === "name") s.name = el.value.trim() || "Schritt";
+    if (f === "note") s.note = el.value;
+    if (f === "type") s.type = el.value;
+    if (f === "optional") s.optional = el.checked;
+    if (f === "mind") s.mind = el.checked;
+    if (f === "sec") { s.sec = Math.min(7200, Math.max(0, parseDur(el.value))); el.value = mmss(s.sec); }
+    store.saveConfig();
+    const sum = box.closest(".steplist") && box.closest(".steplist").previousElementSibling;
+    if (sum) { const t = sum.querySelector(".sum"); if (t) t.textContent = `${list.length} Schritte · ${human(sumSec(list))}`; }
+    return;
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (!state.run || state.run.phase !== "run") return;
+  if (e.target.matches("textarea, input")) return;
+  if (e.code === "Space" || e.key === "Enter") {
+    e.preventDefault();
+    const b = document.querySelector('.acts [data-act="swstop"], .acts [data-act="swstart"], .acts [data-act="done"]');
+    if (b) b.click();
+  }
+  if (e.key === "ArrowRight") { e.preventDefault(); advance("done"); }
+});
+
+/* clock in the topbar */
+setInterval(() => {
+  const n = document.getElementById("now");
+  if (n) n.textContent = clockOf(new Date());
+}, 20000);
+
+/* ---------------- boot ---------------- */
+render();
+
+const saved = LS.read("run", null);
+if (saved && saved.day === isoDay() && Date.now() - saved.startedAt < 3*3600e3 && saved.phase === "run") {
+  state.run = saved;
+  document.documentElement.setAttribute("data-phase", saved.routine);
+  document.documentElement.style.setProperty("--wash",
+    saved.routine === "morning" ? "color-mix(in srgb, var(--dawn) 11%, transparent)"
+                                : "color-mix(in srgb, var(--dusk) 13%, transparent)");
+  enterStep(true);
+  render();
+  tickLoop();
+}
+
+store.connect().then(ok => { if (ok) render(); });
+</script>

@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Node / Build-Werkzeuge, falls das Projekt später welche bekommt
+node_modules/
+dist/
+build/
+.cache/
+*.log
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Umgebungsvariablen und Zugangsdaten — nie ins Repo
+.env
+.env.*
+!.env.example
+
+# Editoren
+.vscode/
+.idea/
+*.swp
+
+# Claude Code, lokale Sitzungsdaten
+.claude/
