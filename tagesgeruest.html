@@ -134,6 +134,7 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .btn[disabled]{opacity:.45; cursor:not-allowed}
 .toggle{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-2); cursor:pointer}
 .toggle input{accent-color:var(--c,var(--accent)); width:15px; height:15px}
+.toggle.office{border:1px solid var(--line-strong); border-radius:var(--r-s); padding:5px 9px}
 .peek{font-size:13px; color:var(--ink-3); line-height:1.55}
 .peek b{color:var(--ink-2); font-weight:500}
 
@@ -149,6 +150,10 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .bars span{flex:1; min-width:3px; background:var(--surface-2); border-radius:2px 2px 0 0; position:relative}
 .bars span.pb{background:var(--accent)}
 .bars span.cur{background:var(--ink-3)}
+.goals{display:flex; flex-direction:column; margin-top:14px}
+.goalrow{display:grid; grid-template-columns:1fr auto auto; gap:12px; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px}
+.goalrow .gv{color:var(--accent); font-weight:600; font-size:13px}
+.goalrow .gb{color:var(--ink-3); font-size:12.5px}
 .week{display:flex; gap:6px; margin-top:14px}
 .day{flex:1; display:flex; flex-direction:column; gap:4px; align-items:center}
 .day .lab{font-size:10px; color:var(--ink-3); font-family:var(--f-mono)}
@@ -230,6 +235,9 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .dial .read .u{font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-3); font-weight:600}
 .dial.paused .arc{stroke:var(--line-strong)}
 .dial.over .read .t{color:var(--alert)}
+.dial.hit .arc{stroke:var(--good)}
+.goal{display:flex; align-items:baseline; gap:10px}
+.goal .g{font-family:var(--f-mono); font-size:19px; font-weight:600; color:var(--accent)}
 .trow{display:flex; align-items:center; gap:12px; width:100%; max-width:400px}
 .trow .t{font-family:var(--f-mono); font-size:21px; font-weight:600; flex:none; font-variant-numeric:tabular-nums}
 .trow.over .t{color:var(--alert)}
@@ -337,8 +345,9 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 6,
+  v: 7,
   promptCount: 3,
+  plankPlus: 5,
   bedtime: "22:45",
   sleepHours: 8,
   fallAsleepMin: 15,
@@ -348,43 +357,41 @@ const DEFAULT_CONFIG = {
     {id:"m2",  name:"Toilette",                     type:"check",     sec:240,  note:""},
     {id:"m3",  name:"Wasser + Kreatin",             type:"check",     sec:60,   note:"400 ml Wasser, 5 g Kreatin einrühren, ganz austrinken."},
     {id:"m4",  name:"Berg–Tal",                     type:"check",     sec:60,   note:"3 Durchgänge."},
-    {id:"m5",  name:"Einbeinige Squats",            type:"timer",     sec:40,   note:"Im Wechsel, kontrolliert runter."},
-    {id:"m6",  name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 1 von 3."},
-    {id:"m7",  name:"Breitbeinig nach vorne",       type:"timer",     sec:40,   note:"Langer Rücken, Gewicht nach vorne verlagern.", mind:true},
-    {id:"m8",  name:"Butterfly",                    type:"timer",     sec:50,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", mind:true},
-    {id:"m9",  name:"Plank · Durchgang 1",          type:"stopwatch", sec:60,   note:"Bis kurz vor dem Zittern. Die Zeit wird mitgeschrieben."},
-    {id:"m10", name:"Leiste links",                 type:"timer",     sec:40,   note:"", mind:true},
-    {id:"m11", name:"Leiste rechts",                type:"timer",     sec:40,   note:"", mind:true},
-    {id:"m12", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 2 von 3."},
-    {id:"m13", name:"Oberschenkel innen links",     type:"timer",     sec:40,   note:"", mind:true},
-    {id:"m14", name:"Oberschenkel innen rechts",    type:"timer",     sec:40,   note:"", mind:true},
-    {id:"m15", name:"Plank · Durchgang 2",          type:"stopwatch", sec:60,   note:"Zweiter Durchgang. Wird getrennt getrackt."},
-    {id:"m16", name:"Hintern links",                type:"timer",     sec:30,   note:"", mind:true},
-    {id:"m17", name:"Hintern rechts",               type:"timer",     sec:30,   note:"", mind:true},
-    {id:"m18", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 3 von 3."},
-    {id:"m19", name:"Band über Kopf",               type:"timer",     sec:20,   note:"Rotatorenmanschette. Schultern unten lassen."},
-    {id:"m20", name:"Band auseinanderziehen",       type:"timer",     sec:30,   note:"Beide Arme, Schulterblätter zusammen."},
-    {id:"m21", name:"Band unten nach oben, links",  type:"timer",     sec:20,   note:""},
-    {id:"m22", name:"Band unten nach oben, rechts", type:"timer",     sec:20,   note:""},
-    {id:"m22i",name:"Igel",                         type:"timer",     sec:40,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", mind:true},
-    {id:"m23", name:"Facepulls · Satz 1",           type:"timer",     sec:20,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen."},
-    {id:"m24", name:"Pause",                        type:"timer",     sec:30,   note:"Kurz durchatmen, Band neu greifen.", mind:true},
-    {id:"m25", name:"Facepulls · Satz 2",           type:"timer",     sec:20,   note:"Letzte Übung. Danach ins Bad."},
+    {id:"m5",  name:"Einbeinige Squats",            type:"timer",     sec:40,   note:"Im Wechsel, kontrolliert runter.", manual:true},
+    {id:"m6",  name:"Liegestütze",                  type:"check",     sec:75,   note:"15 Stück, Satz 1 von 3."},
+    {id:"m7",  name:"Breitbeinig nach vorne",       type:"timer",     sec:40,   note:"Langer Rücken, Gewicht nach vorne verlagern.", manual:true, mind:true},
+    {id:"m8",  name:"Butterfly",                    type:"timer",     sec:50,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", manual:true, mind:true},
+    {id:"m9",  name:"Plank · Durchgang 1",          type:"stopwatch", sec:90,   note:"Zielzeit halten, danach geht meistens noch etwas."},
+    {id:"m10", name:"Leiste links",                 type:"timer",     sec:40,   note:"", manual:true, mind:true},
+    {id:"m11", name:"Leiste rechts",                type:"timer",     sec:40,   note:"", manual:true, mind:true},
+    {id:"m12", name:"Liegestütze",                  type:"check",     sec:75,   note:"15 Stück, Satz 2 von 3."},
+    {id:"m13", name:"Oberschenkel innen links",     type:"timer",     sec:50,   note:"", manual:true, mind:true},
+    {id:"m14", name:"Oberschenkel innen rechts",    type:"timer",     sec:50,   note:"", manual:true, mind:true},
+    {id:"m15", name:"Plank · Durchgang 2",          type:"stopwatch", sec:70,   note:"Zweiter Durchgang, eigene Zielzeit."},
+    {id:"m16", name:"Hintern links",                type:"timer",     sec:30,   note:"", manual:true, mind:true},
+    {id:"m17", name:"Hintern rechts",               type:"timer",     sec:30,   note:"", manual:true, mind:true},
+    {id:"m18", name:"Liegestütze",                  type:"check",     sec:75,   note:"15 Stück, Satz 3 von 3."},
+    {id:"m19", name:"Band über Kopf",               type:"timer",     sec:30,   note:"Rotatorenmanschette. Schultern unten lassen.", manual:true},
+    {id:"m20", name:"Band auseinanderziehen",       type:"timer",     sec:30,   note:"Beide Arme, Schulterblätter zusammen.", manual:true},
+    {id:"m21", name:"Band unten nach oben, links",  type:"timer",     sec:20,   note:"", manual:true},
+    {id:"m22", name:"Band unten nach oben, rechts", type:"timer",     sec:20,   note:"", manual:true},
+    {id:"m22i",name:"Igel",                         type:"timer",     sec:40,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", manual:true, mind:true},
+    {id:"m23", name:"Facepulls · Satz 1",           type:"timer",     sec:20,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen.", manual:true},
+    {id:"m24", name:"Pause",                        type:"timer",     sec:30,   note:"Läuft von allein. Band neu greifen.", mind:true},
+    {id:"m25", name:"Facepulls · Satz 2",           type:"timer",     sec:20,   note:"Letzte Übung. Danach ins Bad.", manual:true},
     {id:"m27", name:"Anziehen",                     type:"check",     sec:180,  note:"Das Outfit liegt von gestern Abend bereit."},
-    {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:""},
+    {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:"", manual:true},
     {id:"m29", name:"Gesicht & Haare",              type:"check",     sec:180,  note:""},
-    {id:"m30", name:"Frühstück",                    type:"check",     sec:600,  note:"Nach dem Wochenplan im Kalender."},
-    {id:"m31", name:"Tasche, Schlüssel, Handy",     type:"check",     sec:120,  note:"Einmal gegenprüfen statt zweimal suchen."},
-    {id:"m32", name:"Lichter & Geräte aus?",        type:"check",     sec:45,   note:"Bad, Küche, Herd, Wasserkocher, Fenster. Einmal die Runde."},
-    {id:"m33", name:"Raus",                         type:"check",     sec:0,    note:""}
+    {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
+    {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
+    {id:"m33", name:"Raus",                         type:"check",     sec:0,    note:"", office:true}
   ],
   evening: [
     {id:"e1", name:"Küche klar machen",             type:"check",   sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true},
-    {id:"e2", name:"Essen für morgen vorbereiten",  type:"timer",   sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box."},
-    {id:"e3", name:"Outfit rauslegen",              type:"check",   sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr."},
-    {id:"e4", name:"Tasche packen",                 type:"check",   sec:180,  note:""},
+    {id:"e2", name:"Essen für morgen vorbereiten",  type:"timer",   sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box, in den Kühlschrank.", manual:true},
+    {id:"e3", name:"Outfit rauslegen",              type:"check",   sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr.", office:true},
     {id:"e6", name:"Zähne putzen",                  type:"reflect", sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
-    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true},
+    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true, manual:true},
     {id:"e9", name:"Wecker stellen",                type:"check",   sec:60,   note:"", deadline:"wake"},
     {id:"e10",name:"Handy weg & Licht aus",         type:"check",   sec:60,   note:"Ladekabel außerhalb des Schlafzimmers. Ab hier brauchst du es nicht mehr.", deadline:"phone"}
   ]
@@ -417,7 +424,17 @@ function shiftTime(t, minutes){
 }
 function plusMinutes(date, minutes){ return new Date(date.getTime() + minutes*60000); }
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function activeSteps(list, shortMode){ return list.filter(s => !(shortMode && s.optional)); }
+function activeSteps(list, shortMode, homeOffice){
+  return list.filter(s => !(shortMode && s.optional) && !(homeOffice && s.office));
+}
+/* Die Abendroutine bereitet den nächsten Tag vor, also zählt dort das Morgen. */
+function officeDayFor(routine){ return routine === "evening" ? isoDay(new Date(Date.now() + 864e5)) : isoDay(); }
+function isHomeOffice(routine){ return !!state.office[officeDayFor(routine)]; }
+function setHomeOffice(day, on){
+  if (on) state.office[day] = true; else delete state.office[day];
+  LS.write("office", state.office);
+  if (store.db) store.db.doc("config/office").set({ days: state.office, at: new Date().toISOString() }).catch(()=>{});
+}
 function sumSec(list){ return list.reduce((a,s)=>a+(+s.sec||0), 0); }
 
 /* ---------------- store: db when available, localStorage always ---------------- */
@@ -465,6 +482,11 @@ const store = {
       logs.docs.forEach(d => { const v = d.data(); if (v) seen[d.id] = v; });
       state.logs = Object.assign({}, state.logs, seen);
       LS.write("logs", state.logs);
+      const off = await db.doc("config/office").get();
+      if (off.exists && off.data() && off.data().days && typeof off.data().days === "object") {
+        state.office = Object.assign({}, state.office, off.data().days);
+        LS.write("office", state.office);
+      }
       const notes = await db.collection("notes").orderBy("at","desc").limit(100).get();
       const nrows = notes.docs.map(d => d.data()).filter(n => n && n.id);
       const nmerged = {};
@@ -520,12 +542,14 @@ function normalizeConfig(raw){
       optional: !!s.optional,
       mind: !!s.mind,
       manual: !!s.manual,
+      office: !!s.office,
       deadline: s.deadline || null
     }));
   });
   c.sleepHours = Math.min(12, Math.max(4, +c.sleepHours || 8));
   c.fallAsleepMin = Math.min(90, Math.max(0, Math.round(+c.fallAsleepMin || 0)));
   c.v = DEFAULT_CONFIG.v;
+  c.plankPlus = Math.max(0, Math.min(60, Math.round(+c.plankPlus || DEFAULT_CONFIG.plankPlus)));
   c.promptCount = Math.max(0, Math.min(8, Math.round(
     c.prompts === false ? 0 : (c.promptCount != null ? +c.promptCount : DEFAULT_CONFIG.promptCount)
   )));
@@ -544,6 +568,7 @@ const state = {
   logs: LS.read("logs", {}),
   planks: LS.read("planks", []),
   notes: LS.read("notes", []),
+  office: LS.read("office", {}),
   noteOpen: null,
   view: "home",
   planRoutine: "morning",
@@ -555,8 +580,19 @@ const state = {
   savedFlash: false
 };
 
-function wakeTime(){
-  return shiftTime(state.config.bedtime, state.config.fallAsleepMin + state.config.sleepHours*60);
+function sleepMinutes(){ return state.config.fallAsleepMin + state.config.sleepHours*60; }
+function wakeTime(){ return shiftTime(state.config.bedtime, sleepMinutes()); }
+function wakeAfter(bedDate){ return new Date(bedDate.getTime() + sleepMinutes()*60000); }
+/* Wann liegst du, wenn die Abendroutine jetzt startet? */
+function bedIfStartNow(){
+  const steps = activeSteps(state.config.evening, state.shortEvening, isHomeOffice("evening"));
+  return plusMinutes(new Date(), sumSec(steps)/60);
+}
+/* Wann liegst du, gerechnet ab dem laufenden Durchlauf? */
+function bedFromRun(){
+  const r = state.run;
+  return (r && r.routine === "evening" && r.phase === "run")
+    ? new Date(Date.now() + remainingTargetSec()*1000) : null;
 }
 function phoneAway(){ return shiftTime(state.config.bedtime, -45); }
 function logId(day, routine){ return `${day}__${routine}`; }
@@ -611,6 +647,24 @@ const PROMPTS = [
   "Was hast du in den letzten Monaten aufgegeben, das dir eigentlich gefehlt hat?"
 ];
 
+/* Wählt `want` Positionen aus n, gleichmäßig über die Strecke verteilt und
+   nie zwei direkt hintereinander — sonst landen zwei Fragen auf links/rechts
+   derselben Übung. */
+function pickSpread(n, want, seed){
+  const k = Math.min(want, n);
+  if (k <= 0) return [];
+  const ord = seededOrder(seed + "#spread", n);
+  const out = [];
+  for (let b = 0; b < k; b++) {
+    const lo = Math.floor(b*n/k), hi = Math.floor((b+1)*n/k);
+    const inBucket = ord.filter(i => i >= lo && i < hi);
+    if (!inBucket.length) continue;
+    const spaced = inBucket.find(i => !out.length || i - out[out.length-1] > 1);
+    out.push(spaced !== undefined ? spaced : inBucket[0]);
+  }
+  return out.sort((a,b) => a-b);
+}
+
 function seededOrder(seedStr, n){
   let h = 2166136261;
   for (let i = 0; i < seedStr.length; i++) { h ^= seedStr.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -619,6 +673,18 @@ function seededOrder(seedStr, n){
   const idx = Array.from({length:n}, (_,i) => i);
   for (let i = n-1; i > 0; i--) { const j = Math.floor(rnd()*(i+1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
   return idx;
+}
+
+/* ---------------- Plank: Zielzeit aus dem Verlauf ---------------- */
+function plankBest(stepId){
+  const own = state.planks.filter(p => p.step === stepId);
+  if (own.length) return Math.max(...own.map(p => p.sec));
+  if (state.planks.length) return Math.max(...state.planks.map(p => p.sec));
+  return 0;
+}
+function plankTarget(step){
+  const b = plankBest(step.id);
+  return b ? b + (state.config.plankPlus | 0) : (step.sec || 60);
 }
 
 /* ---------------- sound ---------------- */
@@ -648,8 +714,8 @@ function renderHome(){
   const today = isoDay();
   const focus = focusOfToday();
 
-  const mSteps = activeSteps(c.morning, state.shortMorning);
-  const eSteps = activeSteps(c.evening, state.shortEvening);
+  const mSteps = activeSteps(c.morning, state.shortMorning, isHomeOffice("morning"));
+  const eSteps = activeSteps(c.evening, state.shortEvening, isHomeOffice("evening"));
 
   const el = document.createElement("div");
   el.className = "wrap";
@@ -678,7 +744,16 @@ function renderHome(){
           <span class="val mono" id="wake">${wakeTime()}</span>
         </div>
       </div>
-      <p class="fine">${c.sleepHours} h Schlaf plus ${c.fallAsleepMin} min Einschlafen. Handy weg ab <b class="mono">${phoneAway()}</b>.</p>
+      <p class="fine">${c.sleepHours} h Schlaf plus ${c.fallAsleepMin} min Einschlafen — das oben ist deine Zielzeit.</p>
+      ${(() => {
+        const log = logFor(today, "evening") || logFor(isoDay(new Date(Date.now() - 864e5)), "evening");
+        if (log && log.finished && log.wakeAt) {
+          const bed = new Date(log.bedAt);
+          return `<p class="fine">Abendroutine war um <b class="mono">${clockOf(bed)}</b> durch, dein Wecker steht damit auf <b class="mono">${esc(log.wakeAt)}</b>.</p>`;
+        }
+        const bed = bedIfStartNow();
+        return `<p class="fine">Startest du die Abendroutine jetzt, liegst du <b class="mono">${clockOf(bed)}</b> und der Wecker geht <b class="mono">${clockOf(wakeAfter(bed))}</b>.</p>`;
+      })()}
     </div>
 
     <div class="slabs">
@@ -734,6 +809,7 @@ function slabHTML(routine, title, steps, log, c){
         ${routine === "evening"
           ? `<label class="toggle"><input type="checkbox" id="shortEve" ${state.shortEvening ? "checked" : ""}>Kurzversion (Trainingstag)</label>`
           : `<label class="toggle"><input type="checkbox" id="shortMorn" ${state.shortMorning ? "checked" : ""}>Kurzversion (wenig Zeit)</label>`}
+        <label class="toggle office"><input type="checkbox" id="ho-${routine}" ${isHomeOffice(routine) ? "checked" : ""}>${routine === "evening" ? "Morgen Homeoffice" : "Heute Homeoffice"}</label>
       </div>
     </div>
   </div>`;
@@ -750,6 +826,11 @@ function plankPanel(){
   }
   const best = Math.max(...state.planks.map(p => p.sec));
   const last = rows[rows.length-1];
+  const perStep = (state.config.morning || []).filter(x => x.type === "stopwatch").map(x => ({
+    name: x.name.replace(/^Plank\s*·\s*/, ""),
+    best: plankBest(x.id),
+    ziel: plankTarget(x)
+  }));
   const max = Math.max(best, 1);
   const bars = rows.map((p,i) => {
     const h = Math.max(6, Math.round(p.sec / max * 56));
@@ -766,6 +847,13 @@ function plankPanel(){
         <span class="cap">zuletzt ${delta > 0 ? "+"+delta+" s" : delta < 0 ? delta+" s" : "gleich"}</span>
       </div>
       <div class="bars">${bars}</div>
+    </div>
+    <div class="goals">
+      ${perStep.map(x => `<div class="goalrow">
+        <span class="gn">${esc(x.name)}</span>
+        <span class="gv mono">Ziel ${mmss(x.ziel)}</span>
+        <span class="gb mono">bisher ${x.best ? mmss(x.best) : "–"}</span>
+      </div>`).join("")}
     </div>
   </div>`;
 }
@@ -808,7 +896,7 @@ function weekPanel(){
    ============================================================ */
 function startRun(routine, resume, fromIdx){
   const short = routine === "evening" ? state.shortEvening : state.shortMorning;
-  const list = activeSteps(state.config[routine], short);
+  const list = activeSteps(state.config[routine], short, isHomeOffice(routine));
   if (!list.length) return;
   document.documentElement.setAttribute("data-phase", routine);
   document.documentElement.style.setProperty("--wash",
@@ -841,10 +929,7 @@ function withPrompts(list){
   // candidates are the marked holds; which of them get a question rotates daily
   const cands = list.map((s,i) => s.mind ? i : -1).filter(i => i >= 0);
   if (!cands.length) return steps;
-  const chosen = seededOrder(isoDay()+"#pick", cands.length)
-    .slice(0, Math.min(want, cands.length))
-    .map(k => cands[k])
-    .sort((a,b) => a-b);
+  const chosen = pickSpread(cands.length, want, isoDay()).map(k => cands[k]);
   const order = seededOrder(isoDay(), PROMPTS.length);
   const focus = focusOfToday();
   chosen.forEach((si, k) => {
@@ -864,7 +949,7 @@ function enterStep(initial){
   if (!s) return;
   r.stepStartedAt = Date.now();
   r.paused = false; r.pausedLeft = 0;
-  r.swRunning = false; r.swSec = 0; r.swStartedAt = 0;
+  r.swRunning = false; r.swSec = 0; r.swStartedAt = 0; r.plankHit = false;
   r.fired = false;
   r.armed = isTimed(s) && !s.manual;
   r.stepEndsAt = r.armed ? Date.now() + s.sec*1000 : null;
@@ -878,7 +963,7 @@ function advance(status){
   s.actual = status === "skipped" ? 0 : Math.round((Date.now() - r.stepStartedAt)/1000);
   if (s.type === "stopwatch" && status === "done" && r.swSec > 0) {
     s.actual = r.swSec;
-    store.savePlank({ at:new Date().toISOString(), day:r.day, sec:r.swSec });
+    store.savePlank({ at:new Date().toISOString(), day:r.day, sec:r.swSec, step:s.id, target:plankTarget(s) });
   }
   writeLog(false);
   if (r.idx >= r.steps.length - 1) {
@@ -909,7 +994,10 @@ function writeLog(finished){
     skipped: r.steps.filter(s => s.status === "skipped").map(s => s.name),
     planks: r.steps.filter(s => s.type === "stopwatch" && s.actual > 0).map(s => s.actual),
     stepStates: r.steps.map(s => ({ id:s.id, status:s.status, actual:s.actual })),
-    answers: r.routine === "evening" ? r.answers : undefined
+    answers: r.routine === "evening" ? r.answers : undefined,
+    bedAt: finished && r.routine === "evening" ? new Date(r.endedAt || Date.now()).toISOString() : undefined,
+    wakeAt: finished && r.routine === "evening" ? clockOf(wakeAfter(new Date(r.endedAt || Date.now()))) : undefined,
+    homeOfficeNext: r.routine === "evening" ? isHomeOffice("evening") : undefined
   };
   store.saveLog(logId(r.day, r.routine), log);
 }
@@ -999,13 +1087,15 @@ function paintLive(){
     const sec = (Date.now() - r.swStartedAt)/1000;
     const tEl = document.getElementById("dialtime");
     if (tEl) tEl.textContent = mmss(sec);
+    const target = plankTarget(s);
     const arc = document.getElementById("arc");
     if (arc) {
       const C = 540.35;
-      const best = state.planks.length ? Math.max(...state.planks.map(p=>p.sec)) : Math.max(30, s.sec);
-      const p = Math.min(1, sec/Math.max(1,best));
-      arc.setAttribute("stroke-dashoffset", String(C*(1-p)));
+      arc.setAttribute("stroke-dashoffset", String(C*(1 - Math.min(1, sec/Math.max(1, target)))));
     }
+    const dial = document.getElementById("dial");
+    if (dial) dial.classList.toggle("hit", sec >= target);
+    if (sec >= target && !r.plankHit) { r.plankHit = true; chimeStep(); }
   }
 }
 
@@ -1050,7 +1140,11 @@ function renderRunner(){
 
 function deadlineNote(s){
   if (s.deadline === "phone") return `Ziel war <b class="mono">${phoneAway()}</b>, 45 Minuten vor dem Zubettgehen.`;
-  if (s.deadline === "wake") return `Wecker auf <b class="mono">${wakeTime()}</b> für ${state.config.sleepHours} h Schlaf.`;
+  if (s.deadline === "wake") {
+    const bed = bedFromRun();
+    if (bed) return `Wecker auf <b class="mono">${clockOf(wakeAfter(bed))}</b> — du liegst gegen ${clockOf(bed)}, das sind ${state.config.sleepHours} h Schlaf.`;
+    return `Wecker auf <b class="mono">${wakeTime()}</b> für ${state.config.sleepHours} h Schlaf.`;
+  }
   return "";
 }
 
@@ -1096,20 +1190,27 @@ function stageHTML(s, r){
   }
 
   if (s.type === "stopwatch") {
-    const best = state.planks.length ? Math.max(...state.planks.map(p=>p.sec)) : 0;
+    const best = plankBest(s.id);
+    const target = plankTarget(s);
+    const done = r.swSec > 0;
+    const geschafft = done && r.swSec >= target;
     return `
       <span class="stepno mono">${no}</span>
       <h2>${esc(s.name)}</h2>
       ${note}
-      ${dial(r.swRunning ? 0 : (r.swSec || 0), false)}
+      <div class="goal"><span class="eyebrow">Zielzeit</span><span class="g mono">${mmss(target)}</span></div>
+      ${dial(r.swRunning ? 0 : (r.swSec || 0), false, done ? (geschafft ? "geschafft" : "gehalten") : "bereit")}
       <div class="acts">
         ${r.swRunning
           ? `<button class="btn big" data-act="swstop">Stopp</button>`
-          : r.swSec > 0
+          : done
             ? `<div class="row"><button class="btn big" data-act="done">Weiter</button><button class="btn ghost big" data-act="swreset">Nochmal</button></div>`
             : `<button class="btn big" data-act="swstart">Stoppuhr starten</button>`}
-        ${r.swSec > 0 ? `<span class="hint">${r.swSec} s gehalten${best ? ` · Bestzeit ${mmss(best)}` : ""}</span>`
-                      : best ? `<span class="hint">Bestzeit ${mmss(best)} — Ring füllt sich bis dahin.</span>` : `<span class="hint">Erste Messung: einfach halten, bis es nicht mehr geht.</span>`}
+        ${done
+          ? `<span class="hint">${mmss(r.swSec)} gehalten · Ziel ${mmss(target)} ${r.swSec >= target ? "erreicht" : `um ${target - r.swSec} s verpasst`}${best ? ` · bisher beste ${mmss(best)}` : ""}</span>`
+          : best
+            ? `<span class="hint">Bestzeit ${mmss(best)} plus ${state.config.plankPlus} s. Bei Ziel gibt es einen Ton, danach geht meist noch etwas.</span>`
+            : `<span class="hint">Erste Messung: halten, bis es nicht mehr geht. Ab morgen steht hier eine Zielzeit.</span>`}
         <button class="btn ghost" data-act="skip">Überspringen</button>
       </div>`;
   }
@@ -1175,7 +1276,7 @@ function summaryHTML(){
     : "Abend abgeschlossen.";
   const tail = r.routine === "morning"
     ? `Fertig um <b>${done}</b> · Ziel war ${esc(state.config.outBy)}`
-    : `Fertig um <b>${done}</b> · Wecker steht auf ${wakeTime()}`;
+    : `Fertig um <b>${done}</b> · Wecker auf <b>${clockOf(wakeAfter(new Date(r.endedAt || Date.now())))}</b> für ${state.config.sleepHours} h Schlaf`;
 
   return `<div class="stage"><div class="summary">
     <div class="head">
@@ -1253,7 +1354,7 @@ function renderPlan(){
   const routine = state.planRoutine;
   document.documentElement.setAttribute("data-phase", routine);
   const short = routine === "evening" ? state.shortEvening : state.shortMorning;
-  const steps = activeSteps(state.config[routine], short);
+  const steps = activeSteps(state.config[routine], short, isHomeOffice(routine));
   const total = sumSec(steps);
   const log = logFor(isoDay(), routine);
   const states = {};
@@ -1270,7 +1371,8 @@ function renderPlan(){
       st.type === "stopwatch" ? `<i class="tag sw">Stoppuhr</i>` : "",
       st.type === "reflect" ? `<i class="tag t">Fragen</i>` : "",
       st.mind && want ? `<i class="tag mind">Denkanstoß</i>` : "",
-      st.optional ? `<i class="tag">optional</i>` : ""
+      st.optional ? `<i class="tag">optional</i>` : "",
+      st.office ? `<i class="tag">nur Büro</i>` : ""
     ].join("");
     return `<button class="prow${st.sec ? "" : " zero"}" data-jump="${i}" data-routine="${routine}">
       <span class="off">+${mmss(start)}</span>
@@ -1360,6 +1462,7 @@ function editorList(routine, title, color){
         <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="optional" ${s.optional?"checked":""}>optional</label>
         <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="mind" ${s.mind?"checked":""}>Denkanstoß</label>
         <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="manual" ${s.manual?"checked":""}>Start selbst</label>
+        <label class="toggle" style="--c:${color}"><input type="checkbox" data-f="office" ${s.office?"checked":""}>nur Büro</label>
       </div>
       <textarea data-f="note" placeholder="Hinweis, der beim Schritt steht">${esc(s.note)}</textarea>
     </div>`).join("");
@@ -1504,7 +1607,7 @@ app.addEventListener("click", e => {
     r.swSec = Math.round((Date.now() - r.swStartedAt)/1000);
     chimeStep(); render(); return;
   }
-  if (act === "swreset") { r.swSec = 0; r.swRunning = false; render(); return; }
+  if (act === "swreset") { r.swSec = 0; r.swRunning = false; r.plankHit = false; render(); return; }
 });
 
 app.addEventListener("change", e => {
@@ -1515,6 +1618,10 @@ app.addEventListener("change", e => {
   }
   if (el.id === "shortEve") {
     state.shortEvening = el.checked; LS.write("shortEvening", state.shortEvening); render(); return;
+  }
+  if (el.id === "ho-evening" || el.id === "ho-morning") {
+    setHomeOffice(officeDayFor(el.id === "ho-evening" ? "evening" : "morning"), el.checked);
+    render(); return;
   }
   if (el.id === "shortMorn") {
     state.shortMorning = el.checked; LS.write("shortMorning", state.shortMorning); render(); return;
@@ -1547,6 +1654,7 @@ app.addEventListener("change", e => {
     if (f === "optional") s.optional = el.checked;
     if (f === "mind") s.mind = el.checked;
     if (f === "manual") s.manual = el.checked;
+    if (f === "office") s.office = el.checked;
     if (f === "sec") { s.sec = Math.min(7200, Math.max(0, parseDur(el.value))); el.value = mmss(s.sec); }
     store.saveConfig();
     const sum = box.closest(".steplist") && box.closest(".steplist").previousElementSibling;
