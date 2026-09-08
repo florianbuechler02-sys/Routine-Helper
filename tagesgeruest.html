@@ -19,6 +19,8 @@
   --accent:var(--dawn);
   --on-accent:#FBFBF9;
   --wash:transparent;
+  --runwash:transparent;
+  --night:#3A4A8C;
   --shadow:0 1px 2px rgba(22,24,26,.05), 0 8px 24px -18px rgba(22,24,26,.35);
   --r-s:6px; --r-m:10px; --r-l:16px;
   --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
@@ -40,6 +42,7 @@
     --good:#69B085;
     --alert:#E28068;
     --on-accent:#16181A;
+    --night:#8891D6;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
   }
 }
@@ -57,14 +60,23 @@
   --good:#69B085;
   --alert:#E28068;
   --on-accent:#16181A;
+  --night:#8891D6;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
 }
-:root[data-phase="evening"]{ --accent:var(--dusk); }
-:root[data-phase="morning"]{ --accent:var(--dawn); }
+:root[data-phase="evening"]{ --accent:var(--dusk); --runwash:color-mix(in srgb, var(--dusk) 15%, transparent); }
+:root[data-phase="morning"]{ --accent:var(--dawn); --runwash:color-mix(in srgb, var(--dawn) 13%, transparent); }
+
+/* Der Hintergrund folgt der Uhr: früh warm, mittags fast neutral, abends kühl. */
+:root[data-time="dawn"] { --wash:color-mix(in srgb, var(--dawn) 15%, transparent); }
+:root[data-time="day"]  { --wash:color-mix(in srgb, var(--dawn) 8%, transparent); }
+:root[data-time="dusk"] { --wash:color-mix(in srgb, var(--dusk) 12%, transparent); }
+:root[data-time="night"]{ --wash:color-mix(in srgb, var(--night) 17%, transparent); }
 
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--ground); color:var(--ink);
+  background-image:radial-gradient(150% 46% at 50% -6%, var(--wash), transparent 70%);
+  background-repeat:no-repeat; background-attachment:fixed;
   font-family:var(--f-body); font-size:16px; line-height:1.5;
   -webkit-text-size-adjust:100%;
   min-height:100vh;
@@ -95,6 +107,13 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l);
   padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow);
 }
+.sleephead{display:flex; align-items:center; gap:10px}
+.chip{font-size:11px; font-weight:600; padding:2px 7px; border-radius:999px; background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent)}
+.readouts{display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end; margin-top:12px; padding-bottom:13px; border-bottom:1px solid var(--line)}
+.ro{display:flex; flex-direction:column; gap:6px; min-width:0; align-items:flex-start}
+.ro input[type="time"]{width:auto; min-width:0}
+.ro.right{align-items:flex-end}
+.ro .big{font-family:var(--f-mono); font-size:36px; font-weight:600; line-height:.95; letter-spacing:-.045em; color:var(--accent)}
 .sleep-row{display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap}
 .field{display:flex; flex-direction:column; gap:5px}
 .field label{font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-3); font-weight:600}
@@ -105,7 +124,8 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .arrow{color:var(--ink-3); padding-bottom:9px; font-size:15px}
 .wakeout{display:flex; flex-direction:column; gap:2px; padding-bottom:2px}
 .wakeout .val{font-family:var(--f-mono); font-size:26px; font-weight:600; color:var(--accent); line-height:1}
-.sleep .fine{font-size:12.5px; color:var(--ink-3); margin:12px 0 0}
+.sleep .fine{font-size:12.5px; color:var(--ink-3); margin:11px 0 0; line-height:1.5}
+.sleep .fine b{color:var(--ink-2); font-weight:600}
 
 /* ---------- routine slabs ---------- */
 .slabs{display:flex; flex-direction:column; gap:12px; margin:22px 0}
@@ -113,13 +133,15 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
   position:relative; background:var(--surface); border:1px solid var(--line);
   border-radius:var(--r-l); overflow:hidden; box-shadow:var(--shadow);
 }
-.slab .stripe{position:absolute; inset:0 auto 0 0; width:4px; background:var(--c,var(--accent))}
-.slab-in{padding:18px 20px 18px 22px; display:flex; flex-direction:column; gap:14px}
+.slab .stripe{position:absolute; inset:0 auto auto 0; height:3px; width:100%;
+  background:linear-gradient(90deg, var(--c,var(--accent)), color-mix(in srgb, var(--c,var(--accent)) 12%, transparent))}
+.slab-in{padding:19px 20px 18px; display:flex; flex-direction:column; gap:14px}
 .slab-head{display:flex; align-items:flex-start; gap:12px}
 .slab-head h2{font-size:22px; color:var(--c,var(--accent))}
 .slab-head .meta{margin-left:auto; text-align:right; font-family:var(--f-mono); font-size:12px; color:var(--ink-3); line-height:1.6}
-.slab-head .meta b{display:block; font-size:17px; font-weight:600; color:var(--ink)}
-.state{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2)}
+.slab-head .meta b{display:block; font-size:23px; font-weight:600; color:var(--ink); letter-spacing:-.03em; line-height:1.1}
+.state{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:999px; padding:3px 10px 3px 8px; margin-top:7px}
 .dot{width:8px; height:8px; border-radius:50%; background:var(--line-strong); flex:none}
 .dot.done{background:var(--good)}
 .dot.part{background:var(--c,var(--accent))}
@@ -131,6 +153,10 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 }
 .btn.ghost{background:none; border-color:var(--line-strong); color:var(--ink-2); font-weight:500}
 .btn.ghost:hover{border-color:var(--ink-3); color:var(--ink)}
+.btn{transition:transform .08s ease, filter .12s ease}
+.btn:active{transform:translateY(1px)}
+.btn:not(.ghost):hover{filter:brightness(1.06)}
+.panel h3, .slab-head h2{letter-spacing:-.02em}
 .btn[disabled]{opacity:.45; cursor:not-allowed}
 .toggle{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-2); cursor:pointer}
 .toggle input{accent-color:var(--c,var(--accent)); width:15px; height:15px}
@@ -146,8 +172,8 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .plankfig{display:flex; flex-direction:column; gap:1px; flex:none}
 .plankfig .val{font-family:var(--f-mono); font-size:30px; font-weight:600; line-height:1; color:var(--accent)}
 .plankfig .cap{font-size:11px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-3); font-weight:600}
-.bars{display:flex; align-items:flex-end; gap:4px; height:56px; flex:1; min-width:0}
-.bars span{flex:1; min-width:3px; background:var(--surface-2); border-radius:2px 2px 0 0; position:relative}
+.bars{display:flex; align-items:flex-end; justify-content:flex-end; gap:4px; height:56px; flex:1; min-width:0}
+.bars span{flex:1; min-width:3px; max-width:26px; background:var(--surface-2); border-radius:2px 2px 0 0; position:relative}
 .bars span.pb{background:var(--accent)}
 .bars span.cur{background:var(--ink-3)}
 .goals{display:flex; flex-direction:column; margin-top:14px}
@@ -197,7 +223,7 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .runner{
   position:fixed; inset:0; background:var(--ground);
   display:flex; flex-direction:column; z-index:20;
-  background-image:radial-gradient(120% 60% at 50% -10%, var(--wash), transparent 70%);
+  background-image:radial-gradient(125% 58% at 50% -10%, var(--runwash), transparent 72%);
 }
 .sessionbar{
   display:grid; grid-template-columns:auto 1fr auto; gap:10px 16px; align-items:center;
@@ -215,23 +241,28 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .track i.skip{background:var(--line-strong)}
 .track i.now{background:var(--ink)}
 
-.stage:has(.mind) .dial{width:164px; height:164px}
+.stage:has(.mind) .dial{width:172px; height:172px}
 .stage:has(.mind) h2{font-size:clamp(25px,6.6vw,34px)}
 .mind{
   max-width:36ch; text-align:left; border-left:2px solid var(--accent);
   padding:3px 0 3px 13px; display:flex; flex-direction:column; gap:4px;
 }
 .mind p{margin:0; font-family:var(--f-display); font-weight:500; font-size:17px; line-height:1.35}
+@keyframes riseIn{ from{opacity:0; transform:translateY(9px)} to{opacity:1; transform:none} }
+.stage > *{animation:riseIn .24s cubic-bezier(.2,.7,.3,1)}
 .stage{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:26px 22px; text-align:center; overflow-y:auto}
 .stepno{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); letter-spacing:.05em}
 .stage h2{font-size:clamp(30px,8.5vw,44px); line-height:1.05; max-width:19ch}
 .stage .note{font-size:15px; color:var(--ink-2); max-width:34ch; margin:0; line-height:1.5}
-.dial{position:relative; width:212px; height:212px; flex:none}
+.dial{position:relative; width:232px; height:232px; flex:none}
 .dial svg{width:100%; height:100%; transform:rotate(-90deg)}
-.dial .rail{fill:none; stroke:var(--surface-2); stroke-width:12}
-.dial .arc{fill:none; stroke:var(--accent); stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .18s linear}
+.dial .rail{fill:none; stroke:color-mix(in srgb, var(--line-strong) 55%, transparent); stroke-width:13}
+.dial .arc{fill:none; stroke:var(--accent); stroke-width:13; stroke-linecap:round; transition:stroke-dashoffset .18s linear}
+.dial .tick{stroke:var(--line-strong); stroke-width:1.4; opacity:.7}
+.dial .tick.long{stroke:var(--ink-3); stroke-width:1.8; opacity:.9}
+.dial .read .t{text-shadow:0 1px 0 var(--ground)}
 .dial .read{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px}
-.dial .read .t{font-family:var(--f-mono); font-size:40px; font-weight:600; line-height:1; letter-spacing:-.02em}
+.dial .read .t{font-family:var(--f-mono); font-size:41px; font-weight:600; line-height:1; letter-spacing:-.045em}
 .dial .read .u{font-size:11px; text-transform:uppercase; letter-spacing:.13em; color:var(--ink-3); font-weight:600}
 .dial.paused .arc{stroke:var(--line-strong)}
 .dial.over .read .t{color:var(--alert)}
@@ -275,7 +306,7 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .summary .head h2{font-size:32px; text-align:left}
 .figs{display:flex; gap:10px}
 .fig{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m); padding:12px 13px; display:flex; flex-direction:column; gap:3px}
-.fig .v{font-family:var(--f-mono); font-size:22px; font-weight:600; line-height:1}
+.fig .v{font-family:var(--f-mono); font-size:25px; font-weight:600; line-height:1; letter-spacing:-.035em}
 .fig .v.over{color:var(--alert)}
 .fig .v.under{color:var(--good)}
 .fig .k{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); font-weight:600}
@@ -328,7 +359,7 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 @media (max-width:400px){
-  .dial{width:180px; height:180px}
+  .dial{width:194px; height:194px}
   .dial .read .t{font-size:34px}
 }
 </style>
@@ -345,7 +376,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 7,
+  v: 8,
   promptCount: 3,
   plankPlus: 5,
   bedtime: "22:45",
@@ -387,9 +418,9 @@ const DEFAULT_CONFIG = {
     {id:"m33", name:"Raus",                         type:"check",     sec:0,    note:"", office:true}
   ],
   evening: [
-    {id:"e1", name:"Küche klar machen",             type:"check",   sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true},
-    {id:"e2", name:"Essen für morgen vorbereiten",  type:"timer",   sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box, in den Kühlschrank.", manual:true},
-    {id:"e3", name:"Outfit rauslegen",              type:"check",   sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr.", office:true},
+    {id:"e1", name:"Küche klar machen",             type:"stopwatch", sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true, track:false},
+    {id:"e2", name:"Essen für morgen vorbereiten",  type:"stopwatch", sec:900,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box, in den Kühlschrank.", track:false},
+    {id:"e3", name:"Outfit rauslegen",              type:"stopwatch", sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr.", office:true, track:false},
     {id:"e6", name:"Zähne putzen",                  type:"reflect", sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
     {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true, manual:true},
     {id:"e9", name:"Wecker stellen",                type:"check",   sec:60,   note:"", deadline:"wake"},
@@ -543,6 +574,7 @@ function normalizeConfig(raw){
       mind: !!s.mind,
       manual: !!s.manual,
       office: !!s.office,
+      track: s.track !== false,
       deadline: s.deadline || null
     }));
   });
@@ -732,16 +764,18 @@ function renderHome(){
     </div>` : ""}
 
     <div class="sleep">
-      <span class="eyebrow">Schlaffenster</span>
-      <div class="sleep-row" style="margin-top:10px">
-        <div class="field">
-          <label for="bed">Ins Bett um</label>
+      <div class="sleephead">
+        <span class="eyebrow">Schlaffenster</span>
+        <span class="chip mono">${c.sleepHours} h</span>
+      </div>
+      <div class="readouts">
+        <div class="ro">
+          <label class="eyebrow" for="bed">Zielzeit ins Bett</label>
           <input type="time" id="bed" value="${esc(c.bedtime)}">
         </div>
-        <span class="arrow">→</span>
-        <div class="wakeout">
+        <div class="ro right">
           <span class="eyebrow">Wecker</span>
-          <span class="val mono" id="wake">${wakeTime()}</span>
+          <span class="big mono" id="wake">${wakeTime()}</span>
         </div>
       </div>
       <p class="fine">${c.sleepHours} h Schlaf plus ${c.fallAsleepMin} min Einschlafen — das oben ist deine Zielzeit.</p>
@@ -826,7 +860,7 @@ function plankPanel(){
   }
   const best = Math.max(...state.planks.map(p => p.sec));
   const last = rows[rows.length-1];
-  const perStep = (state.config.morning || []).filter(x => x.type === "stopwatch").map(x => ({
+  const perStep = (state.config.morning || []).filter(x => x.type === "stopwatch" && x.track !== false).map(x => ({
     name: x.name.replace(/^Plank\s*·\s*/, ""),
     best: plankBest(x.id),
     ziel: plankTarget(x)
@@ -899,9 +933,6 @@ function startRun(routine, resume, fromIdx){
   const list = activeSteps(state.config[routine], short, isHomeOffice(routine));
   if (!list.length) return;
   document.documentElement.setAttribute("data-phase", routine);
-  document.documentElement.style.setProperty("--wash",
-    routine === "morning" ? "color-mix(in srgb, var(--dawn) 11%, transparent)"
-                          : "color-mix(in srgb, var(--dusk) 13%, transparent)");
   if (resume) {
     state.run = resume;
   } else {
@@ -922,7 +953,7 @@ function startRun(routine, resume, fromIdx){
 
 function withPrompts(list){
   const steps = list.map(s => ({ id:s.id, name:s.name, type:s.type, sec:s.sec, note:s.note,
-                                 deadline:s.deadline || null, manual:!!s.manual,
+                                 deadline:s.deadline || null, manual:!!s.manual, track:s.track !== false,
                                  status:"open", actual:0, prompt:null }));
   const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
   if (!want) return steps;
@@ -963,7 +994,9 @@ function advance(status){
   s.actual = status === "skipped" ? 0 : Math.round((Date.now() - r.stepStartedAt)/1000);
   if (s.type === "stopwatch" && status === "done" && r.swSec > 0) {
     s.actual = r.swSec;
-    store.savePlank({ at:new Date().toISOString(), day:r.day, sec:r.swSec, step:s.id, target:plankTarget(s) });
+    if (s.track !== false) {
+      store.savePlank({ at:new Date().toISOString(), day:r.day, sec:r.swSec, step:s.id, target:plankTarget(s) });
+    }
   }
   writeLog(false);
   if (r.idx >= r.steps.length - 1) {
@@ -1087,15 +1120,16 @@ function paintLive(){
     const sec = (Date.now() - r.swStartedAt)/1000;
     const tEl = document.getElementById("dialtime");
     if (tEl) tEl.textContent = mmss(sec);
-    const target = plankTarget(s);
+    const messen = s.track === false;
+    const target = messen ? Math.max(30, s.sec) : plankTarget(s);
     const arc = document.getElementById("arc");
     if (arc) {
       const C = 540.35;
       arc.setAttribute("stroke-dashoffset", String(C*(1 - Math.min(1, sec/Math.max(1, target)))));
     }
     const dial = document.getElementById("dial");
-    if (dial) dial.classList.toggle("hit", sec >= target);
-    if (sec >= target && !r.plankHit) { r.plankHit = true; chimeStep(); }
+    if (dial) dial.classList.toggle("hit", !messen && sec >= target);
+    if (!messen && sec >= target && !r.plankHit) { r.plankHit = true; chimeStep(); }
   }
 }
 
@@ -1190,27 +1224,33 @@ function stageHTML(s, r){
   }
 
   if (s.type === "stopwatch") {
-    const best = plankBest(s.id);
-    const target = plankTarget(s);
+    const messen = s.track === false;
+    const best = messen ? 0 : plankBest(s.id);
+    const target = messen ? 0 : plankTarget(s);
     const done = r.swSec > 0;
-    const geschafft = done && r.swSec >= target;
+    const geschafft = !messen && done && r.swSec >= target;
+    const label = done ? (messen ? "gemessen" : geschafft ? "geschafft" : "gehalten") : "bereit";
     return `
       <span class="stepno mono">${no}</span>
       <h2>${esc(s.name)}</h2>
       ${note}
-      <div class="goal"><span class="eyebrow">Zielzeit</span><span class="g mono">${mmss(target)}</span></div>
-      ${dial(r.swRunning ? 0 : (r.swSec || 0), false, done ? (geschafft ? "geschafft" : "gehalten") : "bereit")}
+      ${messen ? "" : `<div class="goal"><span class="eyebrow">Zielzeit</span><span class="g mono">${mmss(target)}</span></div>`}
+      ${dial(r.swRunning ? 0 : (r.swSec || 0), false, label)}
       <div class="acts">
         ${r.swRunning
           ? `<button class="btn big" data-act="swstop">Stopp</button>`
           : done
             ? `<div class="row"><button class="btn big" data-act="done">Weiter</button><button class="btn ghost big" data-act="swreset">Nochmal</button></div>`
-            : `<button class="btn big" data-act="swstart">Stoppuhr starten</button>`}
-        ${done
-          ? `<span class="hint">${mmss(r.swSec)} gehalten · Ziel ${mmss(target)} ${r.swSec >= target ? "erreicht" : `um ${target - r.swSec} s verpasst`}${best ? ` · bisher beste ${mmss(best)}` : ""}</span>`
-          : best
-            ? `<span class="hint">Bestzeit ${mmss(best)} plus ${state.config.plankPlus} s. Bei Ziel gibt es einen Ton, danach geht meist noch etwas.</span>`
-            : `<span class="hint">Erste Messung: halten, bis es nicht mehr geht. Ab morgen steht hier eine Zielzeit.</span>`}
+            : `<button class="btn big" data-act="swstart">${messen ? "Loslegen" : "Stoppuhr starten"}</button>`}
+        ${messen
+          ? (done
+              ? `<span class="hint">${mmss(r.swSec)} gebraucht · geplant ${human(s.sec)}</span>`
+              : `<span class="hint">Drücken, wenn du anfängst. Die Uhr läuft mit, bis du fertig bist — daraus wird die echte Dauer.</span>`)
+          : (done
+              ? `<span class="hint">${mmss(r.swSec)} gehalten · Ziel ${mmss(target)} ${r.swSec >= target ? "erreicht" : `um ${target - r.swSec} s verpasst`}${best ? ` · bisher beste ${mmss(best)}` : ""}</span>`
+              : best
+                ? `<span class="hint">Bestzeit ${mmss(best)} plus ${state.config.plankPlus} s. Bei Ziel gibt es einen Ton, danach geht meist noch etwas.</span>`
+                : `<span class="hint">Erste Messung: halten, bis es nicht mehr geht. Ab morgen steht hier eine Zielzeit.</span>`)}
         <button class="btn ghost" data-act="skip">Überspringen</button>
       </div>`;
   }
@@ -1247,9 +1287,24 @@ function stageHTML(s, r){
     </div>`;
 }
 
+let TICKS = "";
+function tickRing(){
+  if (TICKS) return TICKS;
+  const out = [];
+  for (let i = 0; i < 24; i++) {
+    const a = i * (Math.PI/12);
+    const lang = i % 6 === 0;
+    const r1 = lang ? 62 : 67, r2 = 72;
+    out.push(`<line class="tick${lang ? " long" : ""}" x1="${(100+Math.sin(a)*r1).toFixed(2)}" y1="${(100-Math.cos(a)*r1).toFixed(2)}" x2="${(100+Math.sin(a)*r2).toFixed(2)}" y2="${(100-Math.cos(a)*r2).toFixed(2)}"></line>`);
+  }
+  TICKS = out.join("");
+  return TICKS;
+}
+
 function dial(sec, paused, label){
   return `<div class="dial${paused ? " paused" : ""}" id="dial">
     <svg viewBox="0 0 200 200" aria-hidden="true">
+      <g class="ticks">${tickRing()}</g>
       <circle class="rail" cx="100" cy="100" r="86"></circle>
       <circle class="arc" id="arc" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="540.35"></circle>
     </svg>
@@ -1368,7 +1423,7 @@ function renderPlan(){
     const mark = mk && mk.status === "done" ? "mark done" : mk && mk.status === "skipped" ? "mark skip" : "mark";
     const tags = [
       st.type === "timer" ? `<i class="tag t">Timer</i>` : "",
-      st.type === "stopwatch" ? `<i class="tag sw">Stoppuhr</i>` : "",
+      st.type === "stopwatch" ? `<i class="tag sw">${st.track === false ? "gemessen" : "Stoppuhr"}</i>` : "",
       st.type === "reflect" ? `<i class="tag t">Fragen</i>` : "",
       st.mind && want ? `<i class="tag mind">Denkanstoß</i>` : "",
       st.optional ? `<i class="tag">optional</i>` : "",
@@ -1478,9 +1533,16 @@ function editorList(routine, title, color){
 /* ============================================================
    RENDER + EVENTS
    ============================================================ */
+function stampTime(){
+  const h = new Date().getHours();
+  document.documentElement.setAttribute("data-time",
+    h < 5 ? "night" : h < 9 ? "dawn" : h < 17 ? "day" : h < 21 ? "dusk" : "night");
+}
+
 const app = document.getElementById("app");
 
 function render(){
+  stampTime();
   const scroll = window.scrollY;
   app.textContent = "";
   if (state.run) app.appendChild(renderRunner());
@@ -1576,7 +1638,7 @@ app.addEventListener("click", e => {
   const act = t.dataset.act;
   if (!act || !state.run) return;
   const r = state.run, s = currentStep();
-  if (act === "close") { state.run = null; document.documentElement.style.setProperty("--wash","transparent"); render(); return; }
+  if (act === "close") { state.run = null; render(); return; }
   if (act === "done") {
     if (s && s.type === "reflect") {
       const g = document.getElementById("qgood"), tm = document.getElementById("qtom");
@@ -1680,6 +1742,7 @@ document.addEventListener("keydown", e => {
 
 /* clock in the topbar */
 setInterval(() => {
+  stampTime();
   const n = document.getElementById("now");
   if (n) n.textContent = clockOf(new Date());
 }, 20000);
@@ -1691,9 +1754,6 @@ const saved = LS.read("run", null);
 if (saved && saved.day === isoDay() && Date.now() - saved.startedAt < 3*3600e3 && saved.phase === "run") {
   state.run = saved;
   document.documentElement.setAttribute("data-phase", saved.routine);
-  document.documentElement.style.setProperty("--wash",
-    saved.routine === "morning" ? "color-mix(in srgb, var(--dawn) 11%, transparent)"
-                                : "color-mix(in srgb, var(--dusk) 13%, transparent)");
   enterStep(true);
   render();
   tickLoop();
