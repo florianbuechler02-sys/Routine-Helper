@@ -376,9 +376,10 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 9,
+  v: 10,
   promptCount: 3,
   plankPlus: 5,
+  plankMax: 120,
   bedtime: "22:45",
   sleepHours: 8,
   fallAsleepMin: 15,
@@ -389,28 +390,26 @@ const DEFAULT_CONFIG = {
     {id:"m2b", name:"Gesicht waschen, Nase putzen", type:"check",     sec:120,  note:"Haare gleich mit, wenn du schon am Waschbecken stehst."},
     {id:"m3",  name:"Wasser + Kreatin",             type:"check",     sec:120,  note:"400 ml Wasser, 5 g Kreatin einrühren, ganz austrinken."},
     {id:"m3b", name:"Küche aufräumen",              type:"check",     sec:180,  note:"Was von gestern Abend übrig ist.", optional:true},
+
     {id:"m4",  name:"Berg-Tal",                     type:"check",     sec:95,   note:"3 Durchgänge."},
-    {id:"m5",  name:"Einbeinige Squats",            type:"timer",     sec:50,   note:"Im Wechsel, kontrolliert runter.", manual:true},
+    {id:"m7",  name:"Breitbeinig nach vorne",       type:"check",     sec:55,   note:"Am Boden, langer Rücken, bis es deutlich zieht.", mind:true},
+    {id:"m8",  name:"Butterfly",                    type:"check",     sec:65,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", mind:true},
     {id:"m6",  name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 1 von 3."},
-    {id:"m7",  name:"Breitbeinig nach vorne",       type:"timer",     sec:55,   note:"Langer Rücken, Gewicht nach vorne verlagern.", manual:true, mind:true},
-    {id:"m8",  name:"Butterfly",                    type:"timer",     sec:65,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", manual:true, mind:true},
-    {id:"m9",  name:"Plank · Durchgang 1",          type:"stopwatch", sec:110,   note:"Zielzeit halten, danach geht meistens noch etwas."},
-    {id:"m10", name:"Leiste links",                 type:"timer",     sec:60,   note:"", manual:true, mind:true},
-    {id:"m11", name:"Leiste rechts",                type:"timer",     sec:55,   note:"", manual:true, mind:true},
+    {id:"m9",  name:"Plank",                        type:"stopwatch", sec:120,  note:"Zielzeit halten. Bei 2 Minuten ist Schluss, länger bringt nichts."},
+    {id:"m9b", name:"Beine einrollen",              type:"check",     sec:60,   note:"15 Wiederholungen oder bis zum Muskelversagen."},
+    {id:"m10", name:"Leiste",                       type:"check",     sec:90,   note:"Beide Seiten.", mind:true},
     {id:"m12", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 2 von 3."},
-    {id:"m13", name:"Oberschenkel innen links",     type:"timer",     sec:65,   note:"", manual:true, mind:true},
-    {id:"m14", name:"Oberschenkel innen rechts",    type:"timer",     sec:60,   note:"", manual:true, mind:true},
-    {id:"m15", name:"Plank · Durchgang 2",          type:"stopwatch", sec:120,   note:"Zweiter Durchgang, eigene Zielzeit."},
+    {id:"m13", name:"Oberschenkel innen",           type:"check",     sec:100,  note:"Beide Seiten.", mind:true},
     {id:"m18", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 3 von 3."},
-    {id:"m19", name:"Band über Kopf",               type:"timer",     sec:60,   note:"Rotatorenmanschette. Schultern unten lassen.", manual:true},
-    {id:"m20", name:"Band auseinanderziehen",       type:"timer",     sec:40,   note:"Beide Arme, Schulterblätter zusammen.", manual:true},
-    {id:"m21", name:"Band unten nach oben, links",  type:"timer",     sec:35,   note:"", manual:true},
-    {id:"m22", name:"Band unten nach oben, rechts", type:"timer",     sec:40,   note:"", manual:true},
-    {id:"m22i",name:"Igel",                         type:"timer",     sec:55,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", manual:true, mind:true},
-    {id:"m23", name:"Facepulls · Satz 1",           type:"timer",     sec:40,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen.", manual:true},
+    {id:"m19", name:"Band über Kopf",               type:"check",     sec:60,   note:"Rotatorenmanschette. Schultern unten lassen."},
+    {id:"m20", name:"Band auseinanderziehen",       type:"check",     sec:40,   note:"Beide Arme, Schulterblätter zusammen."},
+    {id:"m21", name:"Band unten nach oben",         type:"check",     sec:60,   note:"Beide Seiten."},
+    {id:"m23", name:"Facepulls · Satz 1",           type:"check",     sec:40,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen."},
     {id:"m24", name:"Pause",                        type:"timer",     sec:30,   note:"Läuft von allein. Band neu greifen.", mind:true},
-    {id:"m25", name:"Facepulls · Satz 2",           type:"timer",     sec:40,   note:"Letzte Übung. Danach ins Bad.", manual:true},
-    {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Das Outfit liegt von gestern Abend bereit."},
+    {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:""},
+    {id:"m22i",name:"Igel",                         type:"check",     sec:55,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", mind:true},
+
+    {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:""},
     {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:"", manual:true},
     {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
     {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
@@ -419,11 +418,11 @@ const DEFAULT_CONFIG = {
   evening: [
     {id:"e1", name:"Küche klar machen",             type:"stopwatch", sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true, track:false},
     {id:"e2", name:"Essen für morgen vorbereiten",  type:"stopwatch", sec:480,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box, in den Kühlschrank.", track:false},
-    {id:"e3", name:"Outfit rauslegen",              type:"stopwatch", sec:180,  note:"Komplett: Hose, Shirt, Socken, Jacke. Morgen keine Entscheidung mehr.", office:true, track:false},
-    {id:"e6", name:"Zähne putzen",                  type:"reflect", sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
-    {id:"e7", name:"Lesen",                         type:"timer",   sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true, manual:true},
-    {id:"e9", name:"Wecker stellen",                type:"check",   sec:60,   note:"", deadline:"wake"},
-    {id:"e10",name:"Handy weg & Licht aus",         type:"check",   sec:60,   note:"Ladekabel außerhalb des Schlafzimmers. Ab hier brauchst du es nicht mehr.", deadline:"phone"}
+    {id:"e6", name:"Zähne putzen",                  type:"reflect",   sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
+    {id:"e7", name:"Lesen",                         type:"timer",     sec:1200, note:"Papier, kein Display. Handy umgedreht danebenlegen, der Timer läuft weiter.", optional:true, manual:true},
+    {id:"e8", name:"Meditieren",                    type:"timer",     sec:180,  note:"Sitzen oder liegen, Augen zu, auf den Atem. Gedanken ziehen lassen.", manual:true},
+    {id:"e9", name:"Wecker stellen",                type:"check",     sec:60,   note:"", deadline:"wake"},
+    {id:"e10",name:"Handy weg & Licht aus",         type:"check",     sec:60,   note:"Ladekabel außerhalb des Schlafzimmers. Ab hier brauchst du es nicht mehr.", deadline:"phone"}
   ]
 };
 
@@ -581,6 +580,7 @@ function normalizeConfig(raw){
   c.fallAsleepMin = Math.min(90, Math.max(0, Math.round(+c.fallAsleepMin || 0)));
   c.v = DEFAULT_CONFIG.v;
   c.plankPlus = Math.max(0, Math.min(60, Math.round(+c.plankPlus || DEFAULT_CONFIG.plankPlus)));
+  c.plankMax = Math.max(0, Math.min(600, Math.round(+c.plankMax || DEFAULT_CONFIG.plankMax)));
   c.promptCount = Math.max(0, Math.min(8, Math.round(
     c.prompts === false ? 0 : (c.promptCount != null ? +c.promptCount : DEFAULT_CONFIG.promptCount)
   )));
@@ -715,7 +715,9 @@ function plankBest(stepId){
 }
 function plankTarget(step){
   const b = plankBest(step.id);
-  return b ? b + (state.config.plankPlus | 0) : (step.sec || 60);
+  const roh = b ? b + (state.config.plankPlus | 0) : (step.sec || 60);
+  const deckel = state.config.plankMax | 0;
+  return deckel ? Math.min(roh, deckel) : roh;
 }
 
 /* ---------------- sound ---------------- */
@@ -1248,7 +1250,7 @@ function stageHTML(s, r){
           : (done
               ? `<span class="hint">${mmss(r.swSec)} gehalten · Ziel ${mmss(target)} ${r.swSec >= target ? "erreicht" : `um ${target - r.swSec} s verpasst`}${best ? ` · bisher beste ${mmss(best)}` : ""}</span>`
               : best
-                ? `<span class="hint">Bestzeit ${mmss(best)} plus ${state.config.plankPlus} s. Bei Ziel gibt es einen Ton, danach geht meist noch etwas.</span>`
+                ? `<span class="hint">Bestzeit ${mmss(best)} plus ${state.config.plankPlus} s${target >= (state.config.plankMax|0) ? `, gedeckelt bei ${mmss(state.config.plankMax|0)}` : ""}. Bei Ziel gibt es einen Ton.</span>`
                 : `<span class="hint">Erste Messung: halten, bis es nicht mehr geht. Ab morgen steht hier eine Zielzeit.</span>`)}
         <button class="btn ghost" data-act="skip">Überspringen</button>
       </div>`;
