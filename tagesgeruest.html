@@ -161,6 +161,12 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .toggle{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-2); cursor:pointer}
 .toggle input{accent-color:var(--c,var(--accent)); width:15px; height:15px}
 .toggle.office{border:1px solid var(--line-strong); border-radius:var(--r-s); padding:5px 9px}
+.cycle{display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-s);
+  background:color-mix(in srgb, var(--c,var(--accent)) 11%, transparent);
+  border:1px solid color-mix(in srgb, var(--c,var(--accent)) 28%, transparent)}
+.cycle b{font-family:var(--f-display); font-size:15px; font-weight:700; color:var(--c,var(--accent))}
+.cycle .mini{margin-left:auto}
+.cycle.plan{margin-bottom:14px; --c:var(--accent)}
 .peek{font-size:13px; color:var(--ink-3); line-height:1.55}
 .peek b{color:var(--ink-2); font-weight:500}
 
@@ -363,6 +369,7 @@ h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:bala
 .hcount{margin-left:auto; font-size:19px; font-weight:600; color:var(--accent); letter-spacing:-.03em}
 .fox{display:flex; justify-content:center; margin:6px 0 2px}
 .fox svg{width:150px; height:auto; overflow:visible}
+.fox{--accent:var(--dawn)}
 .fox .umriss *{fill:none; stroke:var(--line-strong); stroke-width:2; stroke-linejoin:round}
 .fox .fuell *{fill:var(--accent); stroke:none}
 .fox .tailtip{fill:var(--surface); stroke:var(--line-strong); stroke-width:1.6}
@@ -455,7 +462,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 15,
+  v: 16,
   promptCount: 3,
   plankPlus: 5,
   plankMax: 120,
@@ -483,21 +490,21 @@ const DEFAULT_CONFIG = {
     {id:"m4",  name:"Berg-Tal",                     type:"check",     sec:95,   note:"3 Durchgänge."},
     {id:"m7",  name:"Breitbeinig nach vorne",       type:"timer",     sec:50,   note:"Am Boden, langer Rücken, bis es deutlich zieht.", manual:true, mind:true, habit:"dehnen"},
     {id:"m8",  name:"Butterfly",                    type:"timer",     sec:50,   note:"Fußsohlen zusammen, Knie locker Richtung Boden.", manual:true, mind:true, habit:"dehnen"},
-    {id:"m6",  name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 1 von 3."},
+    {id:"m6",  name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 1 von 3.", block:"brust"},
     {id:"m22i",name:"Igel",                         type:"timer",     sec:50,   note:"Auf dem Rücken, Beine ganz eng an den Körper ziehen. Der untere Rücken dehnt.", manual:true, mind:true, habit:"dehnen"},
-    {id:"m9",  name:"Plank",                        type:"stopwatch", sec:120,  note:"Zielzeit halten. Bei 2 Minuten ist Schluss, länger bringt nichts."},
+    {id:"m9",  name:"Plank",                        type:"stopwatch", sec:120,  note:"Zielzeit halten. Bei 2 Minuten ist Schluss, länger bringt nichts.", block:"bauch"},
     {id:"m10", name:"Leiste links",                 type:"timer",     sec:45,   note:"", manual:true, mind:true, habit:"dehnen"},
     {id:"m11", name:"Leiste rechts",                type:"timer",     sec:45,   note:"", manual:true, mind:true, habit:"dehnen"},
-    {id:"m12", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 2 von 3."},
-    {id:"m9b", name:"Beine einrollen",              type:"check",     sec:60,   note:"15 Wiederholungen oder bis zum Muskelversagen."},
+    {id:"m12", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 2 von 3.", block:"brust"},
+    {id:"m9b", name:"Beine einrollen",              type:"check",     sec:60,   note:"15 Wiederholungen oder bis zum Muskelversagen.", block:"bauch"},
     {id:"m13", name:"Oberschenkel innen links",     type:"timer",     sec:50,   note:"", manual:true, mind:true, habit:"dehnen"},
     {id:"m14", name:"Oberschenkel innen rechts",    type:"timer",     sec:50,   note:"", manual:true, affirm:true, habit:"affirmation"},
-    {id:"m18", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 3 von 3."},
-    {id:"m19", name:"Band über Kopf",               type:"check",     sec:60,   note:"Rotatorenmanschette. Schultern unten lassen. Beide Seiten."},
-    {id:"m20", name:"Band auseinanderziehen",       type:"check",     sec:40,   note:"Beide Arme, Schulterblätter zusammen."},
-    {id:"m21", name:"Band unten nach oben",         type:"check",     sec:60,   note:"Beide Seiten."},
-    {id:"m23", name:"Facepulls · Satz 1",           type:"check",     sec:40,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen."},
-    {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:"Kurz durchatmen, dann der zweite Satz."},
+    {id:"m18", name:"Liegestütze",                  type:"check",     sec:45,   note:"15 Stück, Satz 3 von 3.", block:"brust"},
+    {id:"m19", name:"Band über Kopf",               type:"check",     sec:60,   note:"Rotatorenmanschette. Schultern unten lassen. Beide Seiten.", block:"brust"},
+    {id:"m20", name:"Band auseinanderziehen",       type:"check",     sec:40,   note:"Beide Arme, Schulterblätter zusammen.", block:"brust"},
+    {id:"m21", name:"Band unten nach oben",         type:"check",     sec:60,   note:"Beide Seiten.", block:"brust"},
+    {id:"m23", name:"Facepulls · Satz 1",           type:"check",     sec:40,   note:"Band im Fenstergriff, auf Gesichtshöhe ziehen.", block:"brust"},
+    {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:"Kurz durchatmen, dann der zweite Satz.", block:"brust"},
 
     {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Outfit zusammenstellen und anziehen."},
     {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:"", manual:true},
@@ -542,8 +549,10 @@ function shiftTime(t, minutes){
 }
 function plusMinutes(date, minutes){ return new Date(date.getTime() + minutes*60000); }
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function activeSteps(list, shortMode, homeOffice){
-  return list.filter(s => !(shortMode && s.optional) && !(homeOffice && s.office));
+function activeSteps(list, shortMode, homeOffice, zyklus){
+  return list.filter(s => !(shortMode && s.optional)
+                       && !(homeOffice && s.office)
+                       && !(s.block && zyklus && s.block !== zyklus));
 }
 /* Die Abendroutine bereitet den nächsten Tag vor, also zählt dort das Morgen. */
 function officeDayFor(routine){ return routine === "evening" ? isoDay(new Date(Date.now() + 864e5)) : isoDay(); }
@@ -604,6 +613,11 @@ const store = {
       if (off.exists && off.data() && off.data().days && typeof off.data().days === "object") {
         state.office = Object.assign({}, state.office, off.data().days);
         LS.write("office", state.office);
+      }
+      const cyc = await db.doc("config/cycle").get();
+      if (cyc.exists && cyc.data() && BLOCK_NAME[cyc.data().next]) {
+        state.cycle = cyc.data().next;
+        LS.write("cycle", state.cycle);
       }
       const hab = await db.collection("habits").orderBy("date","desc").limit(60).get();
       hab.docs.forEach(d => {
@@ -674,6 +688,7 @@ function normalizeConfig(raw){
       track: s.track !== false,
       items: Array.isArray(s.items) ? s.items.slice(0, 8).map(x => String(x)) : null,
       habit: s.habit ? String(s.habit) : null,
+      block: s.block === "brust" || s.block === "bauch" ? s.block : null,
       affirm: !!s.affirm,
       deadline: s.deadline || null
     }));
@@ -705,6 +720,7 @@ const state = {
   notes: LS.read("notes", []),
   office: LS.read("office", {}),
   habits: LS.read("habits", {}),
+  cycle: LS.read("cycle", "brust"),
   noteOpen: null,
   view: "home",
   planRoutine: "morning",
@@ -861,6 +877,24 @@ function seededOrder(seedStr, n){
   return idx;
 }
 
+/* ---------------- Wechsel zwischen Brust- und Bauchtag ----------------
+   Gewechselt wird nicht nach Wochentag, sondern erst wenn der Block
+   wirklich gemacht wurde. Fällt die Routine aus, bleibt derselbe Tag. */
+const BLOCK_NAME = { brust:"Brust & Band", bauch:"Bauch" };
+function setCycle(c){
+  state.cycle = c;
+  LS.write("cycle", c);
+  if (store.db) store.db.doc("config/cycle").set({ next:c, at:new Date().toISOString() }).catch(()=>{});
+}
+function pruefeBlockWechsel(){
+  const r = state.run;
+  if (!r || r.routine !== "morning") return;
+  const dran = r.steps.filter(x => x.block === state.cycle);
+  if (dran.length && dran.every(x => x.status === "done")) {
+    setCycle(state.cycle === "brust" ? "bauch" : "brust");
+  }
+}
+
 /* ---------------- Gewohnheiten ---------------- */
 function habitsAm(tag){ return state.habits[tag] || {}; }
 function setHabit(tag, id, wert){
@@ -928,7 +962,7 @@ function renderHome(){
   const today = isoDay();
   const focus = focusOfToday();
 
-  const mSteps = activeSteps(c.morning, state.shortMorning, isHomeOffice("morning"));
+  const mSteps = activeSteps(c.morning, state.shortMorning, isHomeOffice("morning"), state.cycle);
   const eSteps = activeSteps(c.evening, state.shortEvening, isHomeOffice("evening"));
 
   const el = document.createElement("div");
@@ -1020,6 +1054,11 @@ function slabHTML(routine, title, steps, log, c){
         </div>
         <div class="meta"><b>${human(total)}</b>${steps.length} Schritte</div>
       </div>
+      ${routine === "morning" ? `<div class="cycle">
+        <span class="eyebrow">Heute dran</span>
+        <b>${esc(BLOCK_NAME[state.cycle] || state.cycle)}</b>
+        <button class="mini" data-cycle="1">wechseln</button>
+      </div>` : ""}
       <p class="peek">${esc(first)} …<br>${projected}</p>
       <div class="slab-acts">
         <button class="btn" data-start="${routine}">${done ? "Nochmal starten" : partial ? "Weitermachen" : "Starten"}</button>
@@ -1114,7 +1153,7 @@ function weekPanel(){
    ============================================================ */
 function startRun(routine, resume, fromIdx){
   const short = routine === "evening" ? state.shortEvening : state.shortMorning;
-  const list = activeSteps(state.config[routine], short, isHomeOffice(routine));
+  const list = activeSteps(state.config[routine], short, isHomeOffice(routine), routine === "morning" ? state.cycle : null);
   if (!list.length) return;
   document.documentElement.setAttribute("data-phase", routine);
   if (resume) {
@@ -1145,6 +1184,7 @@ function withPrompts(list){
   const steps = list.map(s => ({ id:s.id, name:s.name, type:s.type, sec:s.sec, note:s.note,
                                  deadline:s.deadline || null, manual:!!s.manual, track:s.track !== false,
                                  items:s.items || null, habit:s.habit || null, affirm:!!s.affirm,
+                                 block:s.block || null,
                                  status:"open", actual:0, prompt:null }));
   steps.forEach((st, i) => { if (list[i].affirm) st.affirm = affirmationHeute(); });
   const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
@@ -1196,6 +1236,7 @@ function advance(status){
     (s.items || []).forEach(hid => setHabit(vortag, hid, !!(r.tally || {})[hid]));
   }
   pruefeAutoHabits();
+  pruefeBlockWechsel();
   writeLog(false);
   if (r.idx >= r.steps.length - 1) {
     r.phase = "summary";
@@ -1753,7 +1794,7 @@ function renderPlan(){
   const routine = state.planRoutine;
   document.documentElement.setAttribute("data-phase", routine);
   const short = routine === "evening" ? state.shortEvening : state.shortMorning;
-  const steps = activeSteps(state.config[routine], short, isHomeOffice(routine));
+  const steps = activeSteps(state.config[routine], short, isHomeOffice(routine), routine === "morning" ? state.cycle : null);
   const total = sumSec(steps);
   const log = logFor(isoDay(), routine);
   const states = {};
@@ -1792,6 +1833,11 @@ function renderPlan(){
       <button data-plan="morning" aria-pressed="${routine === "morning"}">Morgen</button>
       <button data-plan="evening" aria-pressed="${routine === "evening"}">Abend</button>
     </div>
+    ${routine === "morning" ? `<div class="cycle plan">
+      <span class="eyebrow">Heute dran</span>
+      <b>${esc(BLOCK_NAME[state.cycle] || state.cycle)}</b>
+      <button class="mini" data-cycle="1">wechseln</button>
+    </div>` : ""}
     <div class="plansum">
       <div class="fig"><span class="v mono">${human(total)}</span><span class="k">Soll gesamt</span></div>
       <div class="fig"><span class="v mono">${steps.length}</span><span class="k">Schritte</span></div>
@@ -1931,6 +1977,10 @@ app.addEventListener("click", e => {
   if (!t) return;
 
   if (t.dataset.go) { state.view = t.dataset.go; state.run = null; render(); return; }
+  if (t.dataset.cycle) {
+    setCycle(state.cycle === "brust" ? "bauch" : "brust");
+    render(); return;
+  }
   if (t.dataset.plan) { state.planRoutine = t.dataset.plan; state.view = "plan"; state.run = null; render(); return; }
   if (t.dataset.jump) { startRun(t.dataset.routine, null, +t.dataset.jump); return; }
   if (t.dataset.start) { startRun(t.dataset.start); return; }
