@@ -462,7 +462,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 16,
+  v: 17,
   promptCount: 3,
   plankPlus: 5,
   plankMax: 120,
@@ -484,7 +484,7 @@ const DEFAULT_CONFIG = {
      items:["lesen","tagebuch","meditiert"]},
     {id:"m2",  name:"Toilette",                     type:"check",     sec:120,  note:""},
     {id:"m2b", name:"Gesicht waschen, Nase putzen", type:"check",     sec:120,  note:"Haare gleich mit, wenn du schon am Waschbecken stehst."},
-    {id:"m3",  name:"Wasser + Kreatin",             type:"check",     sec:120,  note:"400 ml Wasser, 5 g Kreatin einrühren, ganz austrinken."},
+    {id:"m3",  name:"Wasser, Kreatin & D3",         type:"check",     sec:120,  note:"400 ml Wasser, 5 g Kreatin einrühren, Vitamin D3 dazu, ganz austrinken."},
     {id:"m3b", name:"Küche aufräumen",              type:"check",     sec:180,  note:"Was von gestern Abend übrig ist.", optional:true},
 
     {id:"m4",  name:"Berg-Tal",                     type:"check",     sec:95,   note:"3 Durchgänge."},
@@ -507,7 +507,7 @@ const DEFAULT_CONFIG = {
     {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:"Kurz durchatmen, dann der zweite Satz.", block:"brust"},
 
     {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Outfit zusammenstellen und anziehen."},
-    {id:"m28", name:"Zähne putzen",                 type:"timer",     sec:120,  note:"", manual:true},
+    {id:"m28", name:"Zähne putzen & Dankbarkeit",    type:"timer",     sec:120,  note:"Denk an drei Dinge, für die du dankbar bist. Eine pro vierzig Sekunden.", manual:true},
     {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
     {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
     {id:"m34", name:"Handy freischalten",           type:"check",     sec:30,   note:"Am Brick antippen, die Apps sind wieder da. Erst jetzt, nicht vorher."},
@@ -1061,7 +1061,8 @@ function slabHTML(routine, title, steps, log, c){
       </div>` : ""}
       <p class="peek">${esc(first)} …<br>${projected}</p>
       <div class="slab-acts">
-        <button class="btn" data-start="${routine}">${done ? "Nochmal starten" : partial ? "Weitermachen" : "Starten"}</button>
+        <button class="btn" ${partial ? `data-resume="${routine}"` : `data-start="${routine}"`}>${done ? "Nochmal starten" : partial ? "Weitermachen" : "Starten"}</button>
+        ${partial ? `<button class="btn ghost" data-start="${routine}">Von vorn</button>` : ""}
         <button class="btn ghost" data-plan="${routine}">Ganze Routine</button>
         ${routine === "evening"
           ? `<label class="toggle"><input type="checkbox" id="shortEve" ${state.shortEvening ? "checked" : ""}>Kurzversion (Trainingstag)</label>`
@@ -1204,6 +1205,41 @@ function withPrompts(list){
 }
 
 function isTimed(s){ return !!s && s.sec > 0 && (s.type === "timer" || s.type === "reflect"); }
+
+/* Fortsetzen statt neu anfangen. Der laufende Durchgang liegt im
+   localStorage; fehlt er (Tab entladen, Gerät gewechselt, abgebrochen),
+   wird aus dem Tagesprotokoll rekonstruiert, welche Schritte schon
+   erledigt waren. Die Sitzungsuhr zählt dabei nur die Zeit in den
+   Schritten, nicht die Pause dazwischen. */
+function resumeRun(routine){
+  const gespeichert = LS.read("run", null);
+  if (gespeichert && gespeichert.routine === routine
+      && gespeichert.day === isoDay() && gespeichert.phase === "run") {
+    startRun(routine, gespeichert);
+    return;
+  }
+  const log = logFor(isoDay(), routine);
+  startRun(routine);
+  const r = state.run;
+  if (!r || !log || !Array.isArray(log.stepStates)) return;
+  const frueher = {};
+  log.stepStates.forEach(x => { frueher[x.id] = x; });
+  let verbraucht = 0;
+  r.steps.forEach(st => {
+    const z = frueher[st.id];
+    if (z && z.status && z.status !== "open") {
+      st.status = z.status;
+      st.actual = +z.actual || 0;
+      verbraucht += st.actual;
+    }
+  });
+  const offen = r.steps.findIndex(st => st.status === "open");
+  r.idx = offen >= 0 ? offen : r.steps.length - 1;
+  r.startedAt = Date.now() - verbraucht*1000;
+  enterStep(true);
+  persistRun();
+  render();
+}
 
 function currentStep(){ const r = state.run; return r && r.steps[r.idx] ? r.steps[r.idx] : null; }
 
@@ -1983,6 +2019,7 @@ app.addEventListener("click", e => {
   }
   if (t.dataset.plan) { state.planRoutine = t.dataset.plan; state.view = "plan"; state.run = null; render(); return; }
   if (t.dataset.jump) { startRun(t.dataset.routine, null, +t.dataset.jump); return; }
+  if (t.dataset.resume) { resumeRun(t.dataset.resume); return; }
   if (t.dataset.start) { startRun(t.dataset.start); return; }
   if (t.id === "quit") { quitRun(); return; }
   if (t.id === "mute") { state.muted = !state.muted; LS.write("muted", state.muted); render(); return; }
@@ -2066,7 +2103,7 @@ app.addEventListener("click", e => {
   }
   if (act === "skip") { advance("skipped"); return; }
   if (act === "arm") {
-    if (s && isTimed(s)) { r.stepEndsAt = Date.now() + s.sec*1000; r.armed = true; r.paused = false; r.fired = false; beep(560,.09); }
+    if (s && isTimed(s)) { r.stepEndsAt = Date.now() + s.sec*1000; r.armed = true; r.paused = false; r.fired = false; beep(560,.09); persistRun(); }
     render(); return;
   }
   if (act === "pause") {
@@ -2169,7 +2206,7 @@ setInterval(() => {
 render();
 
 const saved = LS.read("run", null);
-if (saved && saved.day === isoDay() && Date.now() - saved.startedAt < 3*3600e3 && saved.phase === "run") {
+if (saved && saved.day === isoDay() && Date.now() - saved.startedAt < 10*3600e3 && saved.phase === "run") {
   state.run = saved;
   document.documentElement.setAttribute("data-phase", saved.routine);
   enterStep(true);
