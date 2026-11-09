@@ -462,7 +462,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 18,
+  v: 19,
   promptCount: 3,
   plankPlus: 5,
   plankMax: 120,
@@ -507,7 +507,7 @@ const DEFAULT_CONFIG = {
     {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:"Kurz durchatmen, dann der zweite Satz.", block:"brust"},
 
     {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Outfit zusammenstellen und anziehen."},
-    {id:"m30", name:"Frühstück zu Hause",           type:"check",     sec:420,  note:"Nur an den Tagen, an denen du nicht auf der Arbeit isst. Sonst überspringen."},
+    {id:"m30", name:"Frühstück zu Hause",           type:"check",     sec:420,  note:"", onlyIf:"breakfast"},
     {id:"m28", name:"Zähne putzen & Dankbarkeit",    type:"timer",     sec:120,  note:"Denk an drei Dinge, für die du dankbar bist. Eine pro vierzig Sekunden.", manual:true},
     {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
     {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
@@ -553,9 +553,16 @@ function esc(s){ return String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<"
 function activeSteps(list, shortMode, homeOffice, zyklus){
   return list.filter(s => !(shortMode && s.optional)
                        && !(homeOffice && s.office)
-                       && !(s.block && zyklus && s.block !== zyklus));
+                       && !(s.block && zyklus && s.block !== zyklus)
+                       && !(s.onlyIf === "breakfast" && !isBreakfast()));
 }
 /* Die Abendroutine bereitet den nächsten Tag vor, also zählt dort das Morgen. */
+function isBreakfast(){ return !!state.breakfast[isoDay()]; }
+function setBreakfast(tag, on){
+  if (on) state.breakfast[tag] = true; else delete state.breakfast[tag];
+  LS.write("breakfast", state.breakfast);
+  if (store.db) store.db.doc("config/breakfast").set({ days: state.breakfast, at: new Date().toISOString() }).catch(()=>{});
+}
 function officeDayFor(routine){ return routine === "evening" ? isoDay(new Date(Date.now() + 864e5)) : isoDay(); }
 function isHomeOffice(routine){ return !!state.office[officeDayFor(routine)]; }
 function setHomeOffice(day, on){
@@ -614,6 +621,11 @@ const store = {
       if (off.exists && off.data() && off.data().days && typeof off.data().days === "object") {
         state.office = Object.assign({}, state.office, off.data().days);
         LS.write("office", state.office);
+      }
+      const bf = await db.doc("config/breakfast").get();
+      if (bf.exists && bf.data() && bf.data().days && typeof bf.data().days === "object") {
+        state.breakfast = Object.assign({}, state.breakfast, bf.data().days);
+        LS.write("breakfast", state.breakfast);
       }
       const cyc = await db.doc("config/cycle").get();
       if (cyc.exists && cyc.data() && BLOCK_NAME[cyc.data().next]) {
@@ -690,6 +702,7 @@ function normalizeConfig(raw){
       items: Array.isArray(s.items) ? s.items.slice(0, 8).map(x => String(x)) : null,
       habit: s.habit ? String(s.habit) : null,
       block: s.block === "brust" || s.block === "bauch" ? s.block : null,
+      onlyIf: s.onlyIf ? String(s.onlyIf) : null,
       affirm: !!s.affirm,
       deadline: s.deadline || null
     }));
@@ -722,6 +735,7 @@ const state = {
   office: LS.read("office", {}),
   habits: LS.read("habits", {}),
   cycle: LS.read("cycle", "brust"),
+  breakfast: LS.read("breakfast", {}),
   noteOpen: null,
   view: "home",
   planRoutine: "morning",
@@ -1068,6 +1082,7 @@ function slabHTML(routine, title, steps, log, c){
         ${routine === "evening"
           ? `<label class="toggle"><input type="checkbox" id="shortEve" ${state.shortEvening ? "checked" : ""}>Kurzversion (Trainingstag)</label>`
           : `<label class="toggle"><input type="checkbox" id="shortMorn" ${state.shortMorning ? "checked" : ""}>Kurzversion (wenig Zeit)</label>`}
+        ${routine === "morning" ? `<label class="toggle office"><input type="checkbox" id="fruehstueck" ${isBreakfast() ? "checked" : ""}>Frühstück zu Hause</label>` : ""}
         <label class="toggle office"><input type="checkbox" id="ho-${routine}" ${isHomeOffice(routine) ? "checked" : ""}>${routine === "evening" ? "Morgen Homeoffice" : "Heute Homeoffice"}</label>
       </div>
     </div>
@@ -1186,7 +1201,7 @@ function withPrompts(list){
   const steps = list.map(s => ({ id:s.id, name:s.name, type:s.type, sec:s.sec, note:s.note,
                                  deadline:s.deadline || null, manual:!!s.manual, track:s.track !== false,
                                  items:s.items || null, habit:s.habit || null, affirm:!!s.affirm,
-                                 block:s.block || null,
+                                 block:s.block || null, onlyIf:s.onlyIf || null,
                                  status:"open", actual:0, prompt:null }));
   steps.forEach((st, i) => { if (list[i].affirm) st.affirm = affirmationHeute(); });
   const want = Math.max(0, Math.min(8, state.config.promptCount | 0));
@@ -2139,6 +2154,10 @@ app.addEventListener("change", e => {
   }
   if (el.id === "ho-evening" || el.id === "ho-morning") {
     setHomeOffice(officeDayFor(el.id === "ho-evening" ? "evening" : "morning"), el.checked);
+    render(); return;
+  }
+  if (el.id === "fruehstueck") {
+    setBreakfast(isoDay(), el.checked);
     render(); return;
   }
   if (el.id === "shortMorn") {
