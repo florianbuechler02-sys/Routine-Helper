@@ -462,7 +462,7 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 17,
+  v: 18,
   promptCount: 3,
   plankPlus: 5,
   plankMax: 120,
@@ -507,6 +507,7 @@ const DEFAULT_CONFIG = {
     {id:"m25", name:"Facepulls · Satz 2",           type:"check",     sec:40,   note:"Kurz durchatmen, dann der zweite Satz.", block:"brust"},
 
     {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Outfit zusammenstellen und anziehen."},
+    {id:"m30", name:"Frühstück zu Hause",           type:"check",     sec:420,  note:"Nur an den Tagen, an denen du nicht auf der Arbeit isst. Sonst überspringen."},
     {id:"m28", name:"Zähne putzen & Dankbarkeit",    type:"timer",     sec:120,  note:"Denk an drei Dinge, für die du dankbar bist. Eine pro vierzig Sekunden.", manual:true},
     {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
     {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
