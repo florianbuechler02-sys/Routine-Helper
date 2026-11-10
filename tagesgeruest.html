@@ -462,17 +462,20 @@ const DAY_NAMES = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const uid = () => Math.random().toString(36).slice(2,9);
 
 const DEFAULT_CONFIG = {
-  v: 19,
+  v: 20,
   promptCount: 3,
   plankPlus: 5,
   plankMax: 120,
   habits: [
-    {id:"dehnen",      name:"Dehnen",      quelle:"Morgenroutine"},
-    {id:"affirmation", name:"Affirmation", quelle:"Morgenroutine"},
-    {id:"duolingo",    name:"Duolingo",    quelle:"tippen"},
-    {id:"lesen",       name:"Lesen",       quelle:"am Morgen danach"},
-    {id:"tagebuch",    name:"Tagebuch",    quelle:"am Morgen danach"},
-    {id:"meditiert",   name:"Meditieren",  quelle:"am Morgen danach"}
+    {id:"dehnen",        name:"Dehnen",         quelle:"Morgenroutine"},
+    {id:"affirmation",   name:"Affirmation",    quelle:"Morgenroutine"},
+    {id:"creme_morgens", name:"Creme morgens",  quelle:"Morgenroutine"},
+    {id:"creme_mittags", name:"Creme mittags",  quelle:"tippen"},
+    {id:"duolingo",      name:"Duolingo",       quelle:"tippen"},
+    {id:"creme_abends",  name:"Creme abends",   quelle:"Abendroutine"},
+    {id:"lesen",         name:"Lesen",          quelle:"am Morgen danach"},
+    {id:"tagebuch",      name:"Tagebuch",       quelle:"am Morgen danach"},
+    {id:"meditiert",     name:"Meditieren",     quelle:"am Morgen danach"}
   ],
   bedtime: "22:45",
   sleepHours: 8,
@@ -509,6 +512,7 @@ const DEFAULT_CONFIG = {
     {id:"m27", name:"Anziehen",                     type:"check",     sec:120,  note:"Outfit zusammenstellen und anziehen."},
     {id:"m30", name:"Frühstück zu Hause",           type:"check",     sec:420,  note:"", onlyIf:"breakfast"},
     {id:"m28", name:"Zähne putzen & Dankbarkeit",    type:"timer",     sec:120,  note:"Denk an drei Dinge, für die du dankbar bist. Eine pro vierzig Sekunden.", manual:true},
+    {id:"m28b",name:"Creme auftragen",              type:"check",     sec:60,   note:"", habit:"creme_morgens"},
     {id:"m31", name:"Essen & Tasche",               type:"check",     sec:180,  note:"Frühstück und Mittag aus dem Kühlschrank, Laptop, Schlüssel.", office:true},
     {id:"m32", name:"Licht & Geräte",               type:"check",     sec:30,   note:"Geräte per Sprachbefehl. Licht in Schlafzimmer und Bad kurz nachsehen.", office:true},
     {id:"m34", name:"Handy freischalten",           type:"check",     sec:30,   note:"Am Brick antippen, die Apps sind wieder da. Erst jetzt, nicht vorher."},
@@ -518,6 +522,7 @@ const DEFAULT_CONFIG = {
     {id:"e1", name:"Küche klar machen",             type:"stopwatch", sec:300,  note:"Spülmaschine an, Fläche leer. Morgen keine Altlasten.", optional:true, track:false},
     {id:"e2", name:"Essen für morgen vorbereiten",  type:"stopwatch", sec:480,  note:"Frühstück und Mittag nach Wochenplan. Direkt in die Box, in den Kühlschrank.", track:false},
     {id:"e6", name:"Zähne putzen",                  type:"reflect",   sec:120,  note:"Zwei Minuten. Beantworte solange die drei Fragen.", manual:true},
+    {id:"e6b",name:"Creme auftragen",               type:"check",     sec:60,   note:"", habit:"creme_abends"},
     {id:"e9", name:"Wecker stellen",                type:"check",     sec:60,   note:"", deadline:"wake"},
     {id:"e10",name:"Handy ans Brick",               type:"check",     sec:60,   note:"Ab hier brauchst du weder Handy noch diese App. Buch, Tagebuch und zehn Minuten sitzen, dann Licht aus.", deadline:"phone"}
   ]
@@ -929,7 +934,7 @@ function habitQuote(tag){
    gilt die Gewohnheit für heute als erfüllt. */
 function pruefeAutoHabits(){
   const r = state.run;
-  if (!r || r.routine !== "morning") return;
+  if (!r) return;
   (state.config.habits || []).forEach(h => {
     const dazu = r.steps.filter(x => x.habit === h.id);
     if (dazu.length && dazu.every(x => x.status === "done")) setHabit(r.day, h.id, true);
